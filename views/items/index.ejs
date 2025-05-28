@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - 传奇游戏管理系统</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  <%- include('../layouts/header'); %>
+  
+  <div class="container mt-4">
+    <h2><%= title %></h2>
+    
+    <!-- 消息提示 -->
+    <% if (flash.success) { %>
+      <div class="alert alert-success"><%= flash.success %></div>
+    <% } %>
+    <% if (flash.error) { %>
+      <div class="alert alert-danger"><%= flash.error %></div>
+    <% } %>
+    
+    <!-- 添加物品按钮 (仅管理员可见) -->
+    <% if (session.user && session.user.isAdmin) { %>
+      <a href="/items/create" class="btn btn-primary mb-3">添加物品</a>
+    <% } %>
+    
+    <div class="table-responsive">
+      <table class="table table-striped table-hover">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>物品名称</th>
+            <th>类型</th>
+            <th>等级</th>
+            <th>攻击</th>
+            <th>防御</th>
+            <th>价格</th>
+            <th>创建时间</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% items.forEach(item => { %>
+            <tr>
+              <td><%= item.id %></td>
+              <td><%= item.name %></td>
+              <td>
+                <% if (item.type === 1) { %>武器
+                <% } else if (item.type === 2) { %>防具
+                <% } else if (item.type === 3) { %>饰品
+                <% } else if (item.type === 4) { %>消耗品
+                <% } else { %>其他<% } %>
+              </td>
+              <td><%= item.level %></td>
+              <td><%= item.attack %></td>
+              <td><%= item.defense %></td>
+              <td><%= item.price %></td>
+              <td><%= new Date(item.create_time).toLocaleString() %></td>
+              <td>
+                <a href="/items/edit/<%= item.id %>" class="btn btn-sm btn-primary">编辑</a>
+                <% if (session.user && session.user.isAdmin) { %>
+                  <a href="/items/delete/<%= item.id %>" class="btn btn-sm btn-danger" onclick="return confirm('确定要删除这个物品吗?')">删除</a>
+                <% } %>
+              </td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  
+  <%- include('../layouts/footer'); %>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>    

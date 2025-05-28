@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - 传奇游戏管理系统</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  <%- include('../layouts/header'); %>
+  
+  <div class="container mt-5">
+    <h1>编辑玩家</h1>
+    
+
+    <form action="/players/edit/<%= player.account_id %>" method="post">
+      <div class="mb-3">
+        <label for="account_id" class="form-label">账户ID</label>
+        <input type="number" class="form-control" id="account_id" name="account_id" value="<%= player.account_id %>" required readonly>  <!-- 添加 readonly 属性 -->
+      </div>
+      
+      <!-- 检查以下字段的 name 属性是否与后端匹配 -->
+      <div class="mb-3">
+        <label for="email" class="form-label">邮箱</label>
+        <input type="text" class="form-control" id="email" name="email" value="<%= player.email %>" required readonly>  <!-- 添加 readonly 属性 -->
+      </div>
+      
+      <div class="mb-3">
+        <label for="phone" class="form-label">电话</label>
+        <input type="text" class="form-control" id="phone" name="phone" value="<%= player.phone %>" required readonly>  <!-- 添加 readonly 属性 -->
+      </div>
+      
+      <div class="mb-3">
+        <label for="create_time" class="form-label">创建时间</label>
+        <input type="text" class="form-control" id="create_time" name="create_time" value="<%= player.create_time %>" required readonly>  <!-- 添加 readonly 属性 -->
+      </div>
+      
+      <div class="mb-3">
+        <label for="is_banned" class="form-label">封禁</label>
+        <select class="form-select" id="is_banned" name="is_banned" required>  <!-- 保持可编辑 -->
+          <option value="0" <%= player.is_banned === 0 ? 'selected' : '' %>>正常</option>
+          <option value="1" <%= player.is_banned === 1 ? 'selected' : '' %>>封禁</option>
+        </select>
+      </div>
+      
+      <button type="submit" class="btn btn-primary">保存修改</button>
+      <a href="/players" class="btn btn-secondary">返回</a>
+    </form>
+  </div>
+  
+  <%- include('../layouts/footer.ejs'); %>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

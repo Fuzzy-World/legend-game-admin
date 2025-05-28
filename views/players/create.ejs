@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>创建玩家</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  <%- include('../layouts/header'); %>
+  
+  <div class="container mt-5">
+    <h1>创建玩家</h1>
+  
+    
+    <form action="/players/create" method="post">
+      <div class="mb-3">
+        <label for="account_id" class="form-label">账户ID</label>
+        <input type="number" class="form-control" id="account_id" name="account_id" required>
+      </div>
+      
+      <div class="mb-3">
+        <label for="email" class="form-label">邮箱</label>
+        <input type="text" class="form-control" id="email" name="email" required>
+      </div>
+      
+      <div class="mb-3">
+        <label for="phone" class="form-label">电话</label>
+        <input type="text" class="form-control" id="phone" name="phone" required >
+      </div>
+      
+      <div class="mb-3">
+        <label for="create_time" class="form-label">创建时间</label>
+        <% 
+          const now = new Date();
+          const formattedDate = [
+            now.getFullYear(),
+            String(now.getMonth() + 1).padStart(2, '0'),
+            String(now.getDate()).padStart(2, '0')
+          ].join('-') + ' ' + [
+            String(now.getHours()).padStart(2, '0'),
+            String(now.getMinutes()).padStart(2, '0'),
+            String(now.getSeconds()).padStart(2, '0')
+          ].join(':');
+        %>
+        <input type="text" class="form-control" id="create_time" name="create_time" value="<%= formattedDate %>" required>
+      </div>
+      
+      <div class="mb-3">
+        <label for="is_banned" class="form-label">封禁</label>
+        <input type="tinyint" class="form-control" id="is_banned" name="is_banned" required>
+      </div>
+      
+      
+      
+      <button type="submit" class="btn btn-primary">创建</button>
+      <a href="/players" class="btn btn-secondary">返回</a>
+    </form>
+  </div>
+  
+  <%- include('../layouts/footer.ejs'); %>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
