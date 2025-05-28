@@ -1,0 +1,52 @@
+<%- include('../layouts/header'); %>
+<div class="container mt-4">
+  <h2><%= title %></h2>
+  
+<!-- 消息提示（修正后） -->
+<% if (flash.success && flash.success.length > 0) { %>
+  <div class="alert alert-success"><%= flash.success[0] %></div>
+<% } %>
+<% if (flash.error && flash.error.length > 0) { %>
+  <div class="alert alert-danger"><%= flash.error[0] %></div>
+<% } %>
+  <% if (session.user && session.user.isAdmin) { %>
+    <a href="/auction/create" class="btn btn-primary mb-3">新建拍卖</a>
+  <% } %>
+
+  <div class="table-responsive">
+    <table class="table table-striped table-hover">
+      <thead>
+        <tr>
+          <th>物品</th>
+          <th>卖家</th>
+          <th>当前价格</th>
+          <th>结束时间</th>
+          <th>状态</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% auction.forEach(auction => { %>
+          <tr>
+            <td><%= auction.item_name %></td>
+            <td><%= auction.seller_email %></td>
+            <td><%= auction.current_highest_bid %></td>
+            <td><%= new Date(auction.end_time).toLocaleString() %></td>
+            <td><span class="badge bg-<%= {
+              '上架中': 'success',
+              '已完成': 'primary', 
+              '流拍': 'danger'
+            }[auction.status] %>"><%= auction.status %></span></td>
+            <td>
+              <a href="/auction/edit/<%= auction.auction_id %>" class="btn btn-sm btn-primary">编辑</a>
+              <% if (session.user && session.user.isAdmin) { %>
+                <a href="/auction/delete/<%= auction.auction_id %>" class="btn btn-sm btn-danger">删除</a>
+              <% } %>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+</div>
+<%- include('../layouts/footer'); %>

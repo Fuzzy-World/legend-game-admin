@@ -1,14 +1,19 @@
-const db = require('../config/db.config');
+const db = require('../config/db.config'); // 修改为正确路径
 
 // 获取所有物品
+// 新增获取所有物品的方法
 async function getAllItems() {
-  const [rows] = await db.execute('SELECT * FROM items LIMIT 50');
+  const [rows] = await db.execute(`
+    SELECT item_id AS item_id, name 
+    FROM items
+    ORDER BY name ASC
+  `);
   return rows;
 }
 
 // 根据ID获取物品
 async function getItemById(id) {
-  const [rows] = await db.execute('SELECT * FROM items WHERE id = ?', [id]);
+  const [rows] = await db.execute('SELECT * FROM auction_item WHERE id = ?', [id]);
   return rows[0];
 }
 
@@ -38,10 +43,20 @@ async function createItem(itemData) {
   return result.insertId;
 }
 
+// 新增获取所有模板物品的方法
+async function getAllTemplateItems() {
+  const [rows] = await db.execute(`
+    SELECT item_id, name 
+    FROM item_template
+    ORDER BY name ASC
+  `);
+  return rows;
+}
+
 module.exports = {
   getAllItems,
   getItemById,
   updateItem,
   deleteItem,
   createItem
-};    
+};

@@ -1,0 +1,45 @@
+<%- include('../layouts/header'); %>
+<div class="container mt-5">
+  <h1><%= title %></h1>
+  
+  <form method="post" class="row g-3">
+    <div class="col-md-6">
+      <label class="form-label">选择物品</label>
+      <select class="form-select" name="item_inst_id" required>
+        <% items.forEach(item => { %>
+          <option value="<%= item.item_id %>"><%= item.name %></option>
+        <% }); %>
+      </select>
+    </div>
+    
+    <div class="col-md-6">
+      <label class="form-label">选择卖家</label>
+      <select class="form-select" name="seller_id" required>
+        <% sellers.forEach(seller => { %>
+          <option value="<%= seller.id %>"><%= seller.username %></option>
+        <% }); %>
+      </select>
+    </div>
+
+    <div class="col-md-4">
+      <label class="form-label">起拍价</label>
+      <input type="number" class="form-control" name="start_price" min="0" required>
+    </div>
+
+    <div class="col-md-4">
+      <label class="form-label">一口价</label>
+      <input type="number" class="form-control" name="buy_now_price" min="0">
+    </div>
+
+    <div class="col-md-4">
+      <label class="form-label">结束时间</label>
+      <input type="datetime-local" class="form-control" name="end_time" required>
+    </div>
+
+    <div class="col-12">
+      <button type="submit" class="btn btn-primary">创建</button>
+      <a href="/auction" class="btn btn-secondary">返回</a>
+    </div>
+  </form>
+</div>
+<%- include('../layouts/footer'); %>

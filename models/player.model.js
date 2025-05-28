@@ -1,4 +1,4 @@
-const db = require('../config/db.config');
+const db = require('../config/db.config'); // 修改为正确路径
 
 // 获取所有玩家
 async function getAllPlayers() {

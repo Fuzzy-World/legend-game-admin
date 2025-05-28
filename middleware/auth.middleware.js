@@ -1,35 +1,35 @@
 // 验证用户是否已登录
-function isAuthenticated(req, res, next) {
+const isAuthenticated = (req, res, next) => {
+  console.log(`[AUTH] 验证路径: ${req.originalUrl}`); // 新增路径日志
+  console.log('[AUTH] 会话状态:', req.session.user ? '已登录' : '未登录'); // 新增会话状态日志
+  
   if (req.session.user) {
-    // 新增会话有效性验证日志
-    if (!req.session.cookie.expires || new Date() < new Date(req.session.cookie.expires)) {
-      console.log(`用户[${req.session.user.username}]已登录，会话有效`);  // 新增日志
-      return next();
-    }
-  }
-  // 新增会话过期日志
-  console.log('用户未登录或会话已过期');  // 新增日志
-  req.session.regenerate(() => {
-    req.flash('error', '会话已过期，请重新登录');
-    res.redirect('/login');
-  });
-}
-
-// 验证用户是否为管理员
-function isAdmin(req, res, next) {
-  console.log(`检查用户[${req.session.user?.username}]的管理员权限`, req.session.user);  // 优化日志格式
-  if (req.session.user && req.session.user.isAdmin) {
-    console.log(`用户[${req.session.user.username}]是管理员，允许访问`);  // 新增日志
     return next();
   }
-  console.log(`用户[${req.session.user?.username}]权限不足，重定向到登录页`);  // 新增日志
-  req.session.destroy(() => {
-    req.flash('error', '权限不足，请使用管理员账号登录');
-    res.redirect('/login');
-  });
+  
+  console.log('[AUTH] 重定向到登录页面'); // 新增重定向日志
+  req.flash('error', '请先登录');
+  res.redirect('/login');
+};
+
+// 验证用户是否为管理员
+// 在现有中间件中添加参数校验
+function isAdmin(req, res, next) {
+  if (!req.session.user?.isAdmin) {
+    console.log(`非法访问尝试: ${req.method} ${req.originalUrl}`);
+    return res.status(403).redirect('/login');
+  }
+  next();
 }
 
 module.exports = {
   isAuthenticated,
   isAdmin
 };
+
+// 视图文件验证
+// 已确认视图目录存在以下文件：
+// - <mcfile name="create.ejs" path="views/auction/create.ejs"></mcfile>
+// - <mcfile name="edit.ejs" path="views/auction/edit.ejs"></mcfile>
+
+// 权限中间件优化

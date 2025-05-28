@@ -1,0 +1,50 @@
+<%- include('../layouts/header'); %>
+<div class="container mt-4">
+  <h2><%= title %></h2>
+   <!-- 消息提示（修正后） -->
+   <% if (flash.success && flash.success.length > 0) { %>
+    <div class="alert alert-success"><%= flash.success[0] %></div>
+  <% } %>
+  <% if (flash.error && flash.error.length > 0) { %>
+    <div class="alert alert-danger"><%= flash.error[0] %></div>
+  <% } %>
+  <% if (session.user && session.user.isAdmin) { %>
+    <a href="/characters/create" class="btn btn-primary mb-3">创建角色</a>
+  <% } %>
+  
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>所属账户</th>
+        <th>职业</th>
+        <th>等级</th>
+        <th>血量</th>
+        <th>攻击</th>
+        <th>防御</th>
+        <th>角色id</th>
+        <th>操作</th>
+        
+      </tr>
+    </thead>
+    <tbody>
+      <% characters.forEach(c => { %>
+        <tr>
+          <td><%= c.account_id %></td>
+          <td><%= c.char_name %></td>
+          <td><%= c.level %></td>
+          <td><%= c.hp_max %></td>
+          <td><%= c.attack %></td>
+          <td><%= c.defense %></td>
+          <td><%= c.char_id %></td>
+          <td>
+            <a href="/characters/edit/<%= c.char_id %>" class="btn btn-sm btn-primary">编辑</a>
+            <% if (session.user && session.user.isAdmin) { %>
+              <a href="/characters/delete/<%= c.char_id %>" class="btn btn-sm btn-danger">删除</a>
+            <% } %>
+          </td>
+        </tr>
+      <% }); %>
+    </tbody>
+  </table>
+</div>
+<%- include('../layouts/footer'); %>

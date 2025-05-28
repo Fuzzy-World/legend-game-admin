@@ -21,13 +21,14 @@ const pool = mysql.createPool(dbConfig);
 async function testConnection() {
   try {
     const connection = await pool.getConnection();
-    console.log('数据库连接成功');
+    console.log('[DB] 数据库连接成功');
     connection.release();
   } catch (err) {
-    console.error('数据库连接失败: ', err);
+    console.error('[DB] 数据库连接失败:', err.stack); // 增强错误日志
+    process.exit(1); // 连接失败时退出应用
   }
 }
 
 testConnection();
 
-module.exports = pool;    
+module.exports = pool; // 确认导出语句存在

@@ -1,0 +1,37 @@
+<%- include('../layouts/header'); %>
+<div class="container mt-5">
+  <h1><%= title %></h1>
+  
+  <form method="post" class="row g-3">
+    <input type="hidden" name="auction_id" value="<%= auction.auction_id %>">
+    
+    <div class="col-md-6">
+      <label class="form-label">当前状态</label>
+      <select class="form-select" name="status" required>
+        <% statusOptions.forEach(option => { %>
+          <option value="<%= option.value %>" <%= auction.status === option.value ? 'selected' : '' %>>
+            <%= option.text %>
+          </option>
+        <% }); %>
+      </select>
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label">最高出价</label>
+      <input type="number" class="form-control" name="current_highest_bid" 
+             value="<%= auction.current_highest_bid %>" min="0">
+    </div>
+
+    <div class="col-md-12">
+      <label class="form-label">结束时间</label>
+      <input type="datetime-local" class="form-control" name="end_time" 
+             value="<%= new Date(auction.end_time).toISOString().slice(0,16) %>" required>
+    </div>
+
+    <div class="col-12">
+      <button type="submit" class="btn btn-primary">保存</button>
+      <a href="/auction" class="btn btn-secondary">返回</a>
+    </div>
+  </form>
+</div>
+<%- include('../layouts/footer'); %>

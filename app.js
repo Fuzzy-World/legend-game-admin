@@ -5,7 +5,7 @@ const mysql = require('mysql2/promise');
 const path = require('path');
 const dotenv = require('dotenv');
 const flash = require('express-flash'); // 新增引入
-
+const itemRoutes = require('./routes/item.routes');
 dotenv.config();
 
 const app = express();
@@ -66,7 +66,9 @@ app.locals.db = pool;
 // 路由配置
 app.use('/', require('./routes/auth.routes'));
 app.use('/players', require('./routes/player.routes'));
-app.use('/items', require('./routes/item.routes'));
+
+app.use('/auction', require('./routes/auction.routes'));
+app.use('/characters', require('./routes/character.routes'));
 
 // 添加日志，查看未匹配的路由
 app.use((req, res, next) => {
@@ -74,13 +76,20 @@ app.use((req, res, next) => {
   next();
 });
 
+/// 新增请求追踪中间件
+app.use((req, res, next) => {
+  console.log(`[TRACE] 请求路径: ${req.method} ${req.originalUrl}`);
+  console.log('[TRACE] 请求头:', req.headers);
+  next();
+});
+
 // 404错误处理
 app.use((req, res, next) => {
   res.status(404).render('error', { title: '404 Not Found', message: '页面未找到' });
 });
-
 // 启动服务器
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`服务器运行在端口 ${PORT}`);
 });
+
