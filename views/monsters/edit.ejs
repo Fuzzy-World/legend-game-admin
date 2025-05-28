@@ -1,0 +1,63 @@
+
+   
+  
+  <div class="container mt-5">
+    <h1>编辑怪物：<%= monster.monster_name %></h1>
+    
+    <form action="/monsters/edit/<%= monster.monster_id %>" method="post">
+      <div class="mb-3">
+        <label for="monster_name" class="form-label">怪物名称</label>
+        <input type="text" class="form-control" id="monster_name" name="monster_name" 
+               value="<%= monster.monster_name %>" required>
+      </div>
+
+      <div class="mb-3">
+        <label for="monster_type" class="form-label">怪物类型</label>
+        <select class="form-select" id="monster_type" name="monster_type" required>
+          <option value="普通怪" <%= monster.monster_type === '普通怪' ? 'selected' : '' %>>普通怪</option>
+          <option value="精英怪" <%= monster.monster_type === '精英怪' ? 'selected' : '' %>>精英怪</option>
+          <option value="BOSS" <%= monster.monster_type === 'BOSS' ? 'selected' : '' %>>BOSS</option>
+        </select>
+      </div>
+
+      <div class="row">
+        <div class="col-md-3 mb-3">
+          <label for="level" class="form-label">等级</label>
+          <input type="number" class="form-control" id="level" name="level" 
+                 value="<%= monster.level %>" min="1" max="100" required>
+        </div>
+        <div class="col-md-3 mb-3">
+          <label for="hp_max" class="form-label">最大生命值</label>
+          <input type="number" class="form-control" id="hp_max" name="hp_max" 
+                 value="<%= monster.hp_max %>" required>
+        </div>
+        <div class="col-md-3 mb-3">
+          <label for="attack" class="form-label">攻击力</label>
+          <input type="number" class="form-control" id="attack" name="attack" 
+                 value="<%= monster.attack %>" required>
+        </div>
+        <div class="col-md-3 mb-3">
+          <label for="defense" class="form-label">防御力</label>
+          <input type="number" class="form-control" id="defense" name="defense" 
+                 value="<%= monster.defense %>" required>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="move_speed" class="form-label">移动速度</label>
+        <select class="form-select" id="move_speed" name="move_speed" required>
+          <% [1,2,3,4,5].forEach(speed => { %>
+            <option value="<%= speed %>" <%= monster.move_speed == speed ? 'selected' : '' %>>
+              <%= speed %>
+            </option>
+          <% }); %>
+        </select>
+      </div>
+
+      <button type="submit" class="btn btn-primary">保存修改</button>
+      <a href="/monsters" class="btn btn-secondary">返回</a>
+    </form>
+  </div>
+  
+    
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

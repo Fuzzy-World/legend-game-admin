@@ -1,0 +1,50 @@
+
+
+<div class="container mt-4">
+  <h2>地图管理</h2>
+  <!-- 消息提示（修正后） -->
+  <% if (flash.success && flash.success.length > 0) { %>
+    <div class="alert alert-success"><%= flash.success[0] %></div>
+  <% } %>
+  <% if (flash.error && flash.error.length > 0) { %>
+    <div class="alert alert-danger"><%= flash.error[0] %></div>
+  <% } %>
+  
+  <a href="/maps/create" class="btn btn-success mb-3">新建地图</a>
+  
+  <div class="table-responsive">
+    <table class="table table-striped table-hover">
+      <thead>
+        <tr>
+          <th>地图ID</th>
+          <th>名称</th>
+          <th>类型</th>
+          <th>安全区</th>
+          <th>解锁等级</th>
+          <th>图标路径</th>  <!-- 新增列 -->
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% maps.forEach(map => { %>
+          <tr>
+            <td><%= map.map_id %></td>
+            <td><%= map.map_name %></td>
+            <td><%= map.map_type %></td>
+            <td><%= map.is_safe_zone ? '是' : '否' %></td>
+            <td><%= map.unlock_level %></td>
+            <td><%= map.icon_path %></td>  <!-- 新增列 -->
+            <td>
+              <a href="/maps/edit/<%= map.map_id %>" class="btn btn-sm btn-primary">编辑</a>
+              <% if (session.user && session.user.isAdmin) { %>
+                <a href="/maps/delete/<%= map.map_id %>" class="btn btn-sm btn-danger">删除</a>
+              <% } %>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+</table>
+
+  

@@ -1,0 +1,62 @@
+
+ 
+
+<div class="container mt-5">
+  <% if (flash.error && flash.error.length > 0) { %>
+    <div class="alert alert-danger"><%= flash.error[0] %></div>
+  <% } %>
+  <h1>编辑 <%= map.map_name %></h1>
+  
+  <form action="/maps/edit/<%= map.map_id %>" method="post">
+    <div class="mb-3">
+      <label class="form-label">地图名称</label>
+      <input type="text" class="form-control" name="map_name" value="<%= map.map_name %>" required>
+    </div>
+    
+    <div class="mb-3">
+      <label class="form-label">地图类型</label>
+      <select class="form-select" name="map_type" required>
+        <option value="新手村" <%= map.map_type === '新手村' ? 'selected' : '' %>>新手村</option>
+        <option value="野外" <%= map.map_type === '野外' ? 'selected' : '' %>>野外</option>
+        <option value="副本" <%= map.map_type === '副本' ? 'selected' : '' %>>副本</option>
+      </select>
+    </div>
+    
+    <div class="mb-3">
+      <label class="form-label">安全区域</label>
+      <div class="form-check">
+        <input class="form-check-input" type="radio" name="is_safe_zone" 
+          value="1" <%= map.is_safe_zone ? 'checked' : '' %>>
+        <label class="form-check-label">是</label>
+      </div>
+      <div class="form-check">
+        <input class="form-check-input" type="radio" name="is_safe_zone" 
+          value="0" <%= !map.is_safe_zone ? 'checked' : '' %>>
+        <label class="form-check-label">否</label>
+      </div>
+    </div>
+    
+
+    <div class="mb-3">
+      <label class="form-label">刷怪配置(JSON格式)</label>
+      <textarea class="form-control" name="spawn_config" rows="3" required><%= map.spawn_config %></textarea>
+    </div>
+    
+    <div class="mb-3">
+      <label class="form-label">解锁等级</label>
+      <input type="number" class="form-control" name="unlock_level" value="<%= map.unlock_level %>" min="1" required>
+    </div>
+    
+    <div class="mb-3">
+      <label class="form-label">图标路径</label>
+      <input type="text" class="form-control" name="icon_path" value="<%= map.icon_path %>" required>
+    </div>
+    
+    <div class="mt-4">
+      <button type="submit" class="btn btn-primary">保存修改</button>
+      <a href="/maps" class="btn btn-secondary ms-2">取消</a>
+    </div>
+  </form>
+
+  
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

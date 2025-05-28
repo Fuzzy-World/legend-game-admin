@@ -1,0 +1,66 @@
+
+   
+  
+  <div class="container mt-5">
+    <h1>创建新怪物</h1>
+   
+    <form action="/monsters/create" method="post">
+      <div class="mb-3">
+        <label for="monster_name" class="form-label">怪物名称</label>
+        <input type="text" class="form-control" id="monster_name" name="monster_name" required>
+      </div>
+
+      <div class="mb-3">
+        <label for="monster_type" class="form-label">怪物类型</label>
+        <select class="form-select" id="monster_type" name="monster_type" required>
+          <option value="普通怪">普通怪</option>
+          <option value="精英怪">精英怪</option>
+          <option value="BOSS">BOSS</option>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label for="level" class="form-label">等级</label>
+        <input type="number" class="form-control" id="level" name="level" min="1" max="100" required>
+      </div>
+
+      <div class="row">
+        <div class="col-md-4 mb-3">
+          <label for="hp_max" class="form-label">最大生命值</label>
+          <input type="number" class="form-control" id="hp_max" name="hp_max" required>
+        </div>
+        <div class="col-md-4 mb-3">
+          <label for="attack" class="form-label">攻击力</label>
+          <input type="number" class="form-control" id="attack" name="attack" required>
+        </div>
+        <div class="col-md-4 mb-3">
+          <label for="defense" class="form-label">防御力</label>
+          <input type="number" class="form-control" id="defense" name="defense" required>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="map_id" class="form-label">所属地图</label>
+        <select class="form-select" id="map_id" name="map_id" required>
+          <% maps.forEach(map => { %>
+            <option value="<%= map.map_id %>"><%= map.map_name %></option>
+          <% }); %>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label for="move_speed" class="form-label">移动速度</label>
+        <select class="form-select" id="move_speed" name="move_speed" required>
+          <% [1,2,3,4,5].forEach(speed => { %>
+            <option value="<%= speed %>"><%= speed %></option>
+          <% }); %>
+        </select>
+      </div>
+
+      <button type="submit" class="btn btn-primary">创建</button>
+      <a href="/monsters" class="btn btn-secondary">返回</a>
+    </form>
+  </div>
+  
+    
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

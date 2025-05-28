@@ -1,0 +1,12 @@
+
+<div class="container mt-5">
+    <div class="alert alert-danger">
+      <h4 class="alert-heading">确认要删除 <%= map.map_name %> 吗？</h4>
+      <form action="/maps/delete/<%= map.map_id %>" method="post">
+        <button type="submit" class="btn btn-danger">确认删除</button>
+        <a href="/maps" class="btn btn-secondary">取消</a>
+      </form>
+    </div>
+  </div>
+
+  

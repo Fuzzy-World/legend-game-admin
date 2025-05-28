@@ -4,8 +4,10 @@ const session = require('express-session');
 const mysql = require('mysql2/promise');
 const path = require('path');
 const dotenv = require('dotenv');
-const flash = require('express-flash'); // 新增引入
+const flash = require('express-flash');
+const ejsLayouts = require('express-ejs-layouts'); // Add layout package
 const itemRoutes = require('./routes/item.routes');
+const monsterRoutes = require('./routes/monster.routes');
 
 dotenv.config();
 
@@ -15,6 +17,7 @@ const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(ejsLayouts); // Enable layouts middleware
 
 // 会话和flash中间件
 app.use(session({
@@ -27,13 +30,14 @@ app.use(session({
     httpOnly: true  // 添加httpOnly增强安全性
   }
 }));
+
 app.use(flash());
 
 // 设置视图引擎
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
+app.set('layout', 'layouts/main'); // Set default layout path (matches your layout file location)
 app.use((req, res, next) => {
-  // 把 session 对象传递给所有视图
   res.locals.session = req.session;
   next();
 });
@@ -71,6 +75,8 @@ app.use('/items', require('./routes/item.routes'));
 app.use('/drops', require('./routes/drop.routes'));
 app.use('/auction', require('./routes/auction.routes'));
 app.use('/characters', require('./routes/character.routes'));
+app.use('/maps', require('./routes/map.routes'));
+app.use('/monsters', require('./routes/monster.routes'));
 
 // 添加日志，查看未匹配的路由
 app.use((req, res, next) => {
@@ -93,5 +99,10 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`服务器运行在端口 ${PORT}`);
 });
+
+// 在已有路由配置部分添加
+const mapRoutes = require('./routes/map.routes');
+app.use('/maps', mapRoutes);
+app.use('/monsters', monsterRoutes);
 
 

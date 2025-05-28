@@ -11,8 +11,30 @@ async function getActiveauction() {
     JOIN item_template t ON a.item_inst_id = t.item_id
     JOIN \`character\` c ON a.seller_id = c.char_id
     JOIN account acc ON c.account_id = acc.account_id
-    WHERE a.status = '上架中'
+    WHERE a.status = '上架中' 
     ORDER BY a.end_time DESC
+  `);
+  return rows;
+}
+
+// 修改后（获取所有拍卖记录）
+async function getActiveauction() {
+  const [rows] = await db.execute(`
+    SELECT 
+      a.*, 
+      t.item_name,
+      acc.email AS seller_email
+    FROM auction_item a
+    JOIN item_template t ON a.item_inst_id = t.item_id
+    JOIN \`character\` c ON a.seller_id = c.char_id
+    JOIN account acc ON c.account_id = acc.account_id
+    ORDER BY 
+      CASE  
+        WHEN a.status = '上架中' THEN 1 
+        WHEN a.status = '已完成' THEN 2 
+        WHEN a.status = '流拍' THEN 3 
+      END, 
+      a.end_time DESC  
   `);
   return rows;
 }
@@ -152,4 +174,4 @@ module.exports = {
   getUserauction,
   getUserBids,
   closeExpiredauction
-};    
+};
