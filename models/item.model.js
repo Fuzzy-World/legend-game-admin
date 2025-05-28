@@ -43,14 +43,36 @@ async function createItem(itemData) {
   return result.insertId;
 }
 
-// 新增获取所有模板物品的方法
-async function getAllTemplateItems() {
-  const [rows] = await db.execute(`
-    SELECT item_id, name 
-    FROM item_template
-    ORDER BY name ASC
-  `);
-  return rows;
+// 获取所有模板物品的方法（重命名避免冲突）
+const getAllTemplateItems = async () => {
+  try {
+    // 修正表名和字段映射
+    const [rows] = await db.query(`
+      SELECT 
+        item_id, 
+        item_name AS name,
+        type,
+        rarity,
+        base_attack AS attack,
+        base_defense AS defense,
+        req_level AS level,
+        is_bind
+      FROM item_template
+    `);
+    return rows;
+  } catch (error) {
+    throw new Error('数据库查询失败');
+  }
+};
+
+// 新增创建模板物品的方法
+async function createTemplateItem(itemData) {
+  const { item_name, type, rarity } = itemData;
+  const [result] = await db.execute(
+    'INSERT INTO item_template (item_name, type, rarity) VALUES (?, ?, ?)',
+    [item_name, type, rarity]
+  );
+  return result.insertId;
 }
 
 module.exports = {
@@ -58,5 +80,7 @@ module.exports = {
   getItemById,
   updateItem,
   deleteItem,
-  createItem
+  createItem,
+  createTemplateItem,
+  getAllTemplateItems // 确保导出名称匹配
 };

@@ -1,0 +1,48 @@
+<%- include('../layouts/header', { title }) %>
+<div class="container mt-4">
+    <h2>编辑物品模板及掉落</h2>
+    
+    <% if (typeof flash !== 'undefined' && flash.error && flash.error.length > 0) { %>
+        <div class="alert alert-danger"><%= flash.error[0] %></div>
+    <% } %>
+    
+    <form method="POST" action="/drops/edit/<%= drop.drop_table_id %>">
+        <!-- 物品名称（关联模板的下拉选择） -->
+        <div class="form-group">
+            <label>物品模板名称</label>
+            <% const selectedItem = items.find(item => item.item_id === drop.item_id);%>
+            <input type="text" class="form-control" value="<%= selectedItem ? selectedItem.name : '未找到物品模板' %>" readonly>
+            <!-- 隐藏传递 item_id 给后端 -->
+            <input type="hidden" name="item_id" value="<%= drop.item_id %>">
+        </div>
+
+        <!-- 新增：物品类型（只读展示，参考 create 页结构） -->
+        <div class="form-group">
+            <label>物品类型</label>
+            <input type="text" class="form-control" value="<%= drop.type %>" readonly>  <!-- 从 drop 对象获取关联模板的类型 -->
+        </div>
+
+        <!-- 新增：稀有度（只读展示，参考 create 页结构） -->
+        <div class="form-group">
+            <label>稀有度</label>
+            <input type="text" class="form-control" value="<%= drop.rarity %>" readonly>  <!-- 从 drop 对象获取关联模板的稀有度 -->
+        </div>
+
+        <!-- 原掉落率字段 -->
+        <div class="form-group">
+            <label>掉落率(%)</label>
+            <input type="number" name="drop_rate" class="form-control" min="0" max="100" value="<%= drop.drop_rate %>" required>
+        </div>
+
+        <!-- 原是否绑定字段（标签与 create 页统一为“是否为主线物品”） -->
+        <div class="form-group form-check">
+            <input type="hidden" name="is_bind" value="0"> <!-- 添加隐藏字段，未勾选时默认传0 -->
+            <input type="checkbox" name="is_bind" class="form-check-input" id="isBind" value="1" <%= drop.is_bind ? 'checked' : '' %>>
+            <label class="form-check-label" for="isBind">是否为主线物品</label>  <!-- 标签与 create 页统一 -->
+        </div>
+
+        <button type="submit" class="btn btn-primary">更新</button>
+        <a href="/drops" class="btn btn-secondary">取消</a>
+    </form>
+</div>
+<%- include('../layouts/footer') %>

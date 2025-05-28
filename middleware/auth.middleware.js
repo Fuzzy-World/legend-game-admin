@@ -1,6 +1,6 @@
 // 验证用户是否已登录
 const isAuthenticated = (req, res, next) => {
-  console.log(`[AUTH] 验证路径: ${req.originalUrl}`); // 新增路径日志
+  // 新增路径日志
   console.log('[AUTH] 会话状态:', req.session.user ? '已登录' : '未登录'); // 新增会话状态日志
   
   if (req.session.user) {

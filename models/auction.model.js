@@ -1,7 +1,6 @@
 const db = require('../config/db.config');
 
-// 获取所有状态的拍卖记录（修改前只获取上架中）
-// 获取所有拍卖记录（修复SQL注释问题）
+// 获取上架中的拍卖记录
 async function getActiveauction() {
   const [rows] = await db.execute(`
     SELECT 
@@ -12,6 +11,7 @@ async function getActiveauction() {
     JOIN item_template t ON a.item_inst_id = t.item_id
     JOIN \`character\` c ON a.seller_id = c.char_id
     JOIN account acc ON c.account_id = acc.account_id
+    WHERE a.status = '上架中'
     ORDER BY a.end_time DESC
   `);
   return rows;
@@ -23,7 +23,6 @@ async function updateBid(id, bidAmount, bidderId) {
   try {
     await connection.beginTransaction();
     
-    // 更新最高出价方法中的条件判断
     const [auction] = await connection.execute(
       `SELECT 
         auction_id,
@@ -41,7 +40,6 @@ async function updateBid(id, bidAmount, bidderId) {
       return false;
     }
     
-    // 更新出价
     const [result] = await connection.execute(
       `UPDATE auction_item SET 
         current_highest_bid = ?,
@@ -84,12 +82,12 @@ async function getAuctionById(id) {
 }
 
 // 创建拍卖
-async function createAuction(itemInstId, sellerId, startPrice, endTime) {
+async function createAuction(itemInstId, sellerId, startPrice, buyNowPrice, endTime) {
   const [result] = await db.execute(
     `INSERT INTO auction_item 
-    (item_inst_id, seller_id, start_price, current_highest_bid, end_time, status) 
-    VALUES (?, ?, ?, ?, ?, '上架中')`,
-    [itemInstId, sellerId, startPrice, startPrice, endTime]
+    (item_inst_id, seller_id, start_price, buy_now_price, current_highest_bid, end_time, status) 
+    VALUES (?, ?, ?, ?, ?, ?, '上架中')`,
+    [itemInstId, sellerId, startPrice, buyNowPrice, startPrice, endTime]
   );
   return result.insertId;
 }
@@ -122,32 +120,6 @@ async function getUserBids(userId) {
 async function closeExpiredauction() {
   const [result] = await db.execute(`
     UPDATE auction_item 
-    SET status = '已结束' 
-    WHERE status = '上架中' 
-    AND end_time <= NOW()
-  `);
-  return result.affectedRows;
-}
-
-// 新增拍卖状态更新函数
-async function updateAuction(id, status) {
-  // 更新状态枚举列表
-  const validStatuses = ['上架中', '已完成', '流拍'];
-  if (!validStatuses.includes(status)) {
-    throw new Error('无效的拍卖状态');
-  }
-  
-  const [result] = await db.execute(
-    `UPDATE auction_item SET status = ? 
-    WHERE auction_id = ?`,
-    [status, id]
-  );
-  return result.affectedRows > 0;
-}
-
-async function closeExpiredauction() {
-  const [result] = await db.execute(`
-    UPDATE auction_item 
     SET status = '流拍'  
     WHERE status = '上架中' 
     AND end_time <= NOW()
@@ -155,17 +127,21 @@ async function closeExpiredauction() {
   return result.affectedRows;
 }
 
-// 修复用户出价记录查询
-async function getUserBids(userId) {
-  const [rows] = await db.execute(`
-    SELECT a.*, t.item_name, a.current_highest_bid AS my_bid
-    FROM auction_item a
-    JOIN item_template t ON a.item_inst_id = t.item_id
-    WHERE a.last_bidder_id = ?
-    ORDER BY a.last_bid_time DESC
-  `, [userId]);
-  return rows;
+// 更新拍卖状态、当前最高出价和结束时间
+async function updateAuction(id, status, current_highest_bid, end_time) {
+  const validStatuses = ['上架中', '已完成', '流拍'];
+  if (!validStatuses.includes(status)) {
+    throw new Error('无效的拍卖状态');
+  }
+  
+  const [result] = await db.execute(
+    `UPDATE auction_item SET status = ?, current_highest_bid = ?, end_time = ? 
+    WHERE auction_id = ?`,
+    [status, current_highest_bid, end_time, id]
+  );
+  return result.affectedRows > 0;
 }
+
 module.exports = {
   getActiveauction,
   updateBid,
@@ -176,4 +152,4 @@ module.exports = {
   getUserauction,
   getUserBids,
   closeExpiredauction
-};
+};    

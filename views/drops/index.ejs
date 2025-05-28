@@ -1,0 +1,47 @@
+<%- include('../layouts/header', { title }) %> 
+<div class="container mt-4">
+    <h2>物品模板及掉落管理</h2>
+    
+    <!-- 消息提示（修正后） -->
+    <% if (flash.success && flash.success.length > 0) { %>
+        <div class="alert alert-success"><%= flash.success[0] %></div>
+      <% } %>
+      <% if (flash.error && flash.error.length > 0) { %>
+        <div class="alert alert-danger"><%= flash.error[0] %></div>
+      <% } %>
+
+    <div class="mb-3">
+        <a href="/drops/create" class="btn btn-primary">创建新物品模板及掉落</a>
+    </div>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>掉落ID</th>
+                <th>物品名称</th>
+                <th>物品类型</th>
+                <th>稀有度</th>
+                <th>掉落率</th>
+                <th>是否为主线物品</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% drops.forEach(drop => { %>
+                <tr>
+                    <td><%= drop.drop_table_id %></td>
+                    <td><%= drop.item_name %></td>
+                    <td><%= drop.type %></td>
+                    <td><%= drop.rarity %></td>
+                    <td><%= drop.drop_rate %>%</td>
+                    <td><%= drop.is_bind ? '是' : '否' %></td>
+                    <td>
+                        <a href="/drops/edit/<%= drop.drop_table_id %>" class="btn btn-sm btn-warning">编辑</a>
+                        <a href="/drops/delete/<%= drop.drop_table_id %>" class="btn btn-sm btn-danger">删除</a>
+                    </td>
+                </tr>
+            <% }); %>
+        </tbody>
+    </table>
+</div>
+<%- include('../layouts/footer') %> // 同时修正footer路径

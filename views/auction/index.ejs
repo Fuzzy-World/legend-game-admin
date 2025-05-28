@@ -9,9 +9,9 @@
 <% if (flash.error && flash.error.length > 0) { %>
   <div class="alert alert-danger"><%= flash.error[0] %></div>
 <% } %>
-  <% if (session.user && session.user.isAdmin) { %>
-    <a href="/auction/create" class="btn btn-primary mb-3">新建拍卖</a>
-  <% } %>
+<% if (session.user && session.user.isAdmin) { %>
+  <!-- 移除新建拍卖按钮 -->
+<% } %>
 
   <div class="table-responsive">
     <table class="table table-striped table-hover">

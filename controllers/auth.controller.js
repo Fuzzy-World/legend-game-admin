@@ -35,7 +35,7 @@ exports.postLogin = async (req, res) => {
     // 添加会话保存回调及错误日志
     req.session.save(err => {
       if (err) {
-        console.error('会话保存失败:', err);  // 新增错误日志
+         // 新增错误日志
         req.flash('error', '会话保存失败');
         return res.redirect('/login');
       }

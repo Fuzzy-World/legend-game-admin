@@ -20,7 +20,7 @@ CREATE TABLE `auction_item` (
   `buy_now_price` int NOT NULL,
   `current_highest_bid` int NOT NULL DEFAULT '0',
   `end_time` datetime NOT NULL,
-  `status` varchar(20) NOT NULL DEFAULT '上架中',
+  `status` enum('上架中','已完成','流拍') NOT NULL DEFAULT '上架中',
   PRIMARY KEY (`auction_id`),
   KEY `item_inst_id` (`item_inst_id`),
   KEY `seller_id` (`seller_id`),

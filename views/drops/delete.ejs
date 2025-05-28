@@ -1,0 +1,21 @@
+<%- include('../layouts/header', { title }) %>
+<div class="container mt-4">
+    <h2>确认删除物品模板</h2>
+    
+   
+
+    <div class="alert alert-warning">
+        您确定要删除以下物品模板吗？
+        <ul class="mt-2">
+            <li>ID: <%= drop.drop_table_id %></li>
+            <li>物品模板ID: <%= drop.item_id %></li>
+            <li>掉落率: <%= drop.drop_rate %>%</li>
+        </ul>
+    </div>
+
+    <form method="POST" action="/drops/delete/<%= drop.drop_table_id %>?_method=DELETE">
+        <button type="submit" class="btn btn-danger">确认删除</button>
+        <a href="/drops" class="btn btn-secondary">取消</a>
+    </form>
+</div>
+<%- include('../layouts/footer') %>
