@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const itemModel = require('../models/item.model');
+const itemModel = require('../models/itemtemp.model');
 const { isAuthenticated, isAdmin } = require('../middleware/auth.middleware');
 
 // 获取物品列表
@@ -47,38 +47,6 @@ router.get('/edit/:id', isAuthenticated, async (req, res) => {
   }
 });
 
-// 处理编辑物品请求
-router.post('/edit/:id', isAuthenticated, async (req, res) => {
-  try {
-    const itemId = req.params.id;
-    const itemData = req.body;
-    const success = await itemModel.updateItem(itemId, itemData);
-    if (success) {
-      req.flash('success', '物品信息更新成功');
-    } else {
-      req.flash('error', '物品信息更新失败');
-    }
-    res.redirect('/items');
-  } catch (error) {
-    req.flash('error', '更新物品信息失败');
-    res.redirect('/items'); // 修改为固定路由
-  }
-});
 
-// 处理删除物品请求
-router.get('/delete/:id', isAuthenticated, isAdmin, async (req, res) => {
-  try {
-    const success = await itemModel.deleteItem(req.params.id);
-    if (success) {
-      req.flash('success', '物品删除成功');
-    } else {
-      req.flash('error', '物品删除失败');
-    }
-    res.redirect('/items');
-  } catch (error) {
-    req.flash('error', '删除物品失败');
-    res.redirect('/items'); // 修改为固定路由
-  }
-});
 
 module.exports = router;

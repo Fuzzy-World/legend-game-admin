@@ -1,15 +1,12 @@
-
-
 <div class="container mt-4">
   <h2>地图管理</h2>
-  <!-- 消息提示（修正后） -->
-  <% if (flash.success && flash.success.length > 0) { %>
-    <div class="alert alert-success"><%= flash.success[0] %></div>
-  <% } %>
-  <% if (flash.error && flash.error.length > 0) { %>
-    <div class="alert alert-danger"><%= flash.error[0] %></div>
-  <% } %>
-  
+ <!-- 消息提示（修正后） -->
+ <% if (flash.success && flash.success.length > 0) { %>
+  <div class="alert alert-success"><%= flash.success[0] %></div>
+<% } %>
+<% if (flash.error && flash.error.length > 0) { %>
+  <div class="alert alert-danger"><%= flash.error[0] %></div>
+<% } %>
   <a href="/maps/create" class="btn btn-success mb-3">新建地图</a>
   
   <div class="table-responsive">
@@ -43,8 +40,6 @@
           </tr>
         <% }); %>
       </tbody>
-    </table>
-  </div>
-</table>
-
-  
+    </table> <!-- 新增table结束标签 -->
+  </div> <!-- 新增table-responsive结束标签 -->
+</div>

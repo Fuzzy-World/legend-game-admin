@@ -5,9 +5,17 @@ const mysql = require('mysql2/promise');
 const path = require('path');
 const dotenv = require('dotenv');
 const flash = require('express-flash');
-const ejsLayouts = require('express-ejs-layouts'); // Add layout package
+const ejsLayouts = require('express-ejs-layouts');
 const itemRoutes = require('./routes/item.routes');
 const monsterRoutes = require('./routes/monster.routes');
+const playerItemRoutes = require('./routes/player.item.routes');
+const userRouter = require('./routes/user.routes');
+
+
+// 在app.js或入口文件中
+const methodOverride = require('method-override');
+
+// 配置method-override中间件
 
 dotenv.config();
 
@@ -17,8 +25,8 @@ const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(ejsLayouts); // Enable layouts middleware
-
+app.use(ejsLayouts);
+app.use(methodOverride('_method'));
 // 会话和flash中间件
 app.use(session({
   secret: process.env.SESSION_SECRET,
@@ -27,7 +35,7 @@ app.use(session({
   cookie: { 
     secure: false,
     maxAge: 3600000,
-    httpOnly: true  // 添加httpOnly增强安全性
+    httpOnly: true
   }
 }));
 
@@ -36,11 +44,12 @@ app.use(flash());
 // 设置视图引擎
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
-app.set('layout', 'layouts/main'); // Set default layout path (matches your layout file location)
+app.set('layout', 'layouts/main');
 app.use((req, res, next) => {
   res.locals.session = req.session;
   next();
 });
+
 // 数据库连接配置
 const dbConfig = {
   host: process.env.DB_HOST,
@@ -55,54 +64,42 @@ const dbConfig = {
 // 创建数据库连接池
 const pool = mysql.createPool(dbConfig);
 
-// 测试数据库连接
-pool.getConnection()
-  .then(connection => {
-    console.log('数据库连接成功');
+// 正确的测试连接方式
+async function testConnection() {
+  try {
+    const connection = await pool.getConnection();
+    console.log('[DB] 数据库连接成功');
     connection.release();
-  })
-  .catch(err => {
-    console.error('数据库连接失败: ', err);
-  });
+  } catch (err) {
+    console.error('[DB] 数据库连接失败:', err.stack);
+    process.exit(1);
+  }
+}
+
+// 执行测试
+testConnection();
 
 // 全局变量，将数据库连接池传递给所有路由
 app.locals.db = pool;
 
 // 路由配置
 app.use('/', require('./routes/auth.routes'));
-app.use('/players', require('./routes/player.routes'));
+app.use('/auction', require('./routes/auction.routes')); // 移至前面
+app.use('/players', require('./routes/player.routes')); 
 app.use('/items', require('./routes/item.routes'));
 app.use('/drops', require('./routes/drop.routes'));
-app.use('/auction', require('./routes/auction.routes'));
 app.use('/characters', require('./routes/character.routes'));
 app.use('/maps', require('./routes/map.routes'));
-app.use('/monsters', require('./routes/monster.routes'));
-
-// 添加日志，查看未匹配的路由
-app.use((req, res, next) => {
-
-  next();
-});
-
-/// 新增请求追踪中间件
-app.use((req, res, next) => {
-  
-  next();
-});
-
+app.use('/monsters', require('./routes/monster.routes')); // 确保在拍卖路由之后
+app.use('/player-items', require('./routes/player.item.routes'));
+app.use('/user', require('./routes/user.routes'));
 // 404错误处理
 app.use((req, res, next) => {
   res.status(404).render('error', { title: '404 Not Found', message: '页面未找到' });
 });
+
 // 启动服务器
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`服务器运行在端口 ${PORT}`);
 });
-
-// 在已有路由配置部分添加
-const mapRoutes = require('./routes/map.routes');
-app.use('/maps', mapRoutes);
-app.use('/monsters', monsterRoutes);
-
-

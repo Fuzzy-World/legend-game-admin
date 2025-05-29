@@ -1,0 +1,41 @@
+<div class="container mt-5">
+    <h1>创建物品实例</h1>
+    <form action="/player-items/create" method="post">
+        <div class="mb-3">
+            <label class="form-label">角色</label>
+            <select class="form-select" name="char_id" required>
+                <% characters.forEach(char => { %>
+                    <option value="<%= char.char_id %>"><%= char.char_name %></option>
+                <% }); %>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">物品模板</label>
+            <select class="form-select" name="item_id" required>
+                <% items.forEach(item => { %>
+                    <option value="<%= item.item_id %>"><%= item.item_name %></option>
+                <% }); %>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">数量</label>
+            <input type="number" class="form-control" name="count" value="1" min="1" required>
+        </div>
+
+        <div class="mb-3 form-check">
+            <input type="hidden" name="is_equipped" value="0">
+            <input type="checkbox" class="form-check-input" name="is_equipped" id="is_equipped" value="1">
+            <label class="form-check-label" for="is_equipped">是否装备</label>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">强化等级</label>
+            <input type="number" class="form-control" name="enhance_level" value="0" min="0">
+        </div>
+
+        <button type="submit" class="btn btn-primary">创建</button>
+        <a href="/player-items" class="btn btn-secondary">返回</a>
+    </form>
+</div>

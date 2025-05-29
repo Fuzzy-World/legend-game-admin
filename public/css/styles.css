@@ -1,8 +1,19 @@
+/* 确保body作为Flex容器，占满视口高度 */
 body {
+  margin: 0;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  min-height: 100vh; /* 占满视口高度 */
-  margin: 0; /* 清除默认边距 */
+}
+
+/* 内容区域（如main标签）自动扩展，占据剩余空间 */
+main {
+  flex: 1;
+}
+
+/* footer自动定位到容器底部（无需position: fixed，避免覆盖内容） */
+footer {
+  margin-top: auto; 
 }
 
 /* 同时覆盖 mt-4 和 mt-5 的内容容器 */

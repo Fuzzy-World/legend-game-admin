@@ -1,42 +1,45 @@
 
  
+<% if (flash.error && flash.error.length > 0) { %>
+  <div class="alert alert-danger"><%= flash.error[0] %></div>
+<% } %>
+
 <div class="container mt-5">
   <h1><%= title %></h1>
 
   <form method="post">
     <div class="row g-3">
+      <!-- 自动填充account_id的逻辑 -->
+      <% if (account_id) { %>
+        <input type="hidden" name="account_id" value="<%= account_id %>">
+      <% } else { %>
+        <div class="col-md-6">
+          <label class="form-label">账户ID</label>
+          <input type="number" class="form-control" name="account_id" required>
+        </div>
+      <% } %>
+
       <div class="col-md-6">
-        <label class="form-label">账户ID</label>
-        <input type="number" class="form-control" name="account_id" required>
-      </div>
-      
-      <div class="col-md-6">
-        <label class="form-label">职业</label>
-        <select class="form-select" name="char_name" required>
-          <option value="">请选择职业</option>
-          <option value="战士">战士</option>
-          <option value="法师">法师</option>
-          <option value="牧师">牧师</option>
-          <option value="刺客">刺客</option>
-          <option value="射手">射手</option>
-        </select>
+        <label class="form-label">角色名称</label>
+        <input type="text" class="form-control" name="char_name" 
+               pattern="^[\u4e00-\u9fa5]{2,6}$" 
+               title="请输入2-6个汉字" 
+               required>
       </div>
 
+      <!-- 其他字段保持不变 -->
       <div class="col-md-3">
         <label class="form-label">等级</label>
         <input type="number" class="form-control" name="level" min="1" max="100" value="1">
       </div>
-
       <div class="col-md-3">
         <label class="form-label">最大血量</label>
         <input type="number" class="form-control" name="hp_max" value="100">
       </div>
-
       <div class="col-md-3">
         <label class="form-label">攻击</label>
         <input type="number" class="form-control" name="attack" value="10">
       </div>
-
       <div class="col-md-3">
         <label class="form-label">防御</label>
         <input type="number" class="form-control" name="defense" value="5">
@@ -44,7 +47,7 @@
 
       <div class="col-12 mt-4">
         <button type="submit" class="btn btn-primary">提交</button>
-        <a href="/characters" class="btn btn-secondary">返回</a>
+        <a href="javascript:history.back();" class="btn btn-secondary">返回</a>
       </div>
     </div>
   </form>

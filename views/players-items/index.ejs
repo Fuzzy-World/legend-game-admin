@@ -1,0 +1,39 @@
+
+<div class="container mt-4">
+    <h2>玩家物品管理</h2>
+    <% if (session.user && session.user.isAdmin) { %>
+        <a href="/player-items/create" class="btn btn-primary mb-3">添加物品</a>
+      <% } %>
+    <% if (items.length === 0) { %>
+        <div class="alert alert-info">暂无物品实例</div>
+    <% } else { %>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>所属账户ID</th>
+                    <th>所属角色</th>
+                    <th>物品名称</th>
+                    <th>数量</th>
+                    <th>是否装备</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% items.forEach(item => { %>
+                    <tr>
+                        <td><%= item.account_id %></td>
+                        <td><%= item.char_name || '未绑定' %></td>
+                        <td><%= item.item_name %></td>
+                        <td><%= item.count %></td>
+                        <td><%= item.is_equipped ? '✅' : '❌' %></td>
+                        <td>
+                            <a href="/player-items/edit/<%= item.item_inst_id %>" class="btn btn-sm btn-primary">编辑</a>
+                            <% if (session.user && session.user.isAdmin) { %>
+                              <a href="/player-items/delete/<%= item.item_inst_id %>" class="btn btn-sm btn-danger">删除</a>
+                            <% } %>
+                        </td>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+    <% } %>
+</div>

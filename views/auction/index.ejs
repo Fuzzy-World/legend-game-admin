@@ -20,6 +20,7 @@
           <th>物品</th>
           <th>卖家</th>
           <th>当前价格</th>
+          <th>一口价</th>  <!-- 新增列 -->
           <th>结束时间</th>
           <th>状态</th>
           <th>操作</th>
@@ -31,6 +32,7 @@
             <td><%= auction.item_name %></td>
             <td><%= auction.seller_email %></td>
             <td><%= auction.current_highest_bid %></td>
+            <td><%= auction.buy_now_price %></td>  <!-- 新增 -->
             <td><%= new Date(auction.end_time).toLocaleString() %></td>
             <td><span class="badge bg-<%= {
               '上架中': 'success',

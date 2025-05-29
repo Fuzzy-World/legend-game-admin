@@ -1,40 +1,21 @@
 const db = require('../config/db.config');
 
-// 获取上架中的拍卖记录
-async function getActiveauction() {
-  const [rows] = await db.execute(`
-    SELECT 
-      a.*, 
-      t.item_name,
-      acc.email AS seller_email
-    FROM auction_item a
-    JOIN item_template t ON a.item_inst_id = t.item_id
-    JOIN \`character\` c ON a.seller_id = c.char_id
-    JOIN account acc ON c.account_id = acc.account_id
-    WHERE a.status = '上架中' 
-    ORDER BY a.end_time DESC
-  `);
-  return rows;
-}
+
 
 // 修改后（获取所有拍卖记录）
 async function getActiveauction() {
   const [rows] = await db.execute(`
     SELECT 
-      a.*, 
-      t.item_name,
+      a.*,
+      a.buy_now_price,
+      t.item_name,  
       acc.email AS seller_email
     FROM auction_item a
-    JOIN item_template t ON a.item_inst_id = t.item_id
+    JOIN player_item i ON a.item_inst_id = i.item_inst_id  -- 修正关联条件
+    JOIN item_template t ON i.item_id = t.item_id          -- 使用i.item_id关联模板表
     JOIN \`character\` c ON a.seller_id = c.char_id
     JOIN account acc ON c.account_id = acc.account_id
-    ORDER BY 
-      CASE  
-        WHEN a.status = '上架中' THEN 1 
-        WHEN a.status = '已完成' THEN 2 
-        WHEN a.status = '流拍' THEN 3 
-      END, 
-      a.end_time DESC  
+    ORDER BY a.end_time DESC  
   `);
   return rows;
 }
@@ -47,28 +28,33 @@ async function updateBid(id, bidAmount, bidderId) {
     
     const [auction] = await connection.execute(
       `SELECT 
-        auction_id,
-        current_highest_bid
-       FROM auction_item 
-       WHERE auction_id = ? 
-       AND status = '上架中' 
-       AND end_time > NOW() 
-       AND current_highest_bid < ?`,
-      [id, bidAmount]
+        a.auction_id,
+        a.current_highest_bid,
+        a.buy_now_price 
+       FROM auction_item a
+       WHERE a.auction_id = ? 
+       AND a.end_time > NOW() 
+       AND (a.current_highest_bid < ? OR ? >= a.buy_now_price)`,
+      [id, bidAmount, bidAmount]
     );
     
     if (auction.length === 0) {
       await connection.rollback();
       return false;
     }
+
+    const newStatus = bidAmount >= auction[0].buy_now_price ? '已完成' : '上架中';
     
+    // 修改SQL添加last_bid_time字段
     const [result] = await connection.execute(
       `UPDATE auction_item SET 
         current_highest_bid = ?,
         last_bidder_id = ?,
-        last_bid_time = NOW()
+        status = ?, 
+        last_bid_time = NOW(), 
+        end_time = IF(? >= buy_now_price, NOW(), end_time) 
       WHERE auction_id = ?`,
-      [bidAmount, bidderId, id]
+      [bidAmount, bidderId, newStatus, bidAmount, id]
     );
     
     const success = result.affectedRows > 0;
@@ -94,13 +80,22 @@ async function deleteAuction(id) {
 
 // 根据ID获取拍卖详情
 async function getAuctionById(id) {
-  const [rows] = await db.execute(`
-    SELECT a.*, t.item_name, c.char_name AS seller_name 
-    FROM auction_item a
-    JOIN item_template t ON a.item_inst_id = t.item_id
-    JOIN \`character\` c ON a.seller_id = c.char_id
-    WHERE auction_id = ?`, [id]);
-  return rows[0];
+  try {
+    const [rows] = await db.execute(`
+      SELECT 
+        a.*, 
+        COALESCE(t.item_name, '已删除物品') AS item_name,
+        COALESCE(c.char_name, '未知卖家') AS seller_name 
+      FROM auction_item a
+      LEFT JOIN item_template t ON a.item_inst_id = t.item_id
+      LEFT JOIN \`character\` c ON a.seller_id = c.char_id
+      WHERE auction_id = ?`, [id]);
+    
+    return rows[0] || null;
+  } catch (error) {
+    console.error('获取拍卖信息失败:', error);
+    return null;
+  }
 }
 
 // 创建拍卖
@@ -150,16 +145,20 @@ async function closeExpiredauction() {
 }
 
 // 更新拍卖状态、当前最高出价和结束时间
-async function updateAuction(id, status, current_highest_bid, end_time) {
+async function updateAuction(id, status, buy_now_price, current_highest_bid, end_time) {
+  // 添加参数默认值处理
+  buy_now_price = buy_now_price !== undefined ? buy_now_price : null;
+  current_highest_bid = current_highest_bid || 0;
+  
   const validStatuses = ['上架中', '已完成', '流拍'];
   if (!validStatuses.includes(status)) {
     throw new Error('无效的拍卖状态');
   }
   
   const [result] = await db.execute(
-    `UPDATE auction_item SET status = ?, current_highest_bid = ?, end_time = ? 
-    WHERE auction_id = ?`,
-    [status, current_highest_bid, end_time, id]
+    `UPDATE auction_item SET status = ?, buy_now_price = ?, current_highest_bid = ?, end_time = ? 
+    WHERE auction_id = ?`,  
+    [status, buy_now_price, current_highest_bid, end_time, id] 
   );
   return result.affectedRows > 0;
 }

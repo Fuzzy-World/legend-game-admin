@@ -2,8 +2,8 @@ const express = require('express');
 const router = express.Router();
 const dropModel = require('../models/drop.model');
 const { isAuthenticated, isAdmin } = require('../middleware/auth.middleware');
-const itemModel = require('../models/item.model');
-
+const itemModel = require('../models/itemtemp.model');
+const db = require('../config/db.config');
 // 获取所有掉落记录
 router.get('/', isAuthenticated, async (req, res) => {
   try {
@@ -41,13 +41,11 @@ router.get('/create', isAuthenticated, isAdmin, async (req, res) => {
 // 处理创建掉落记录
 router.post('/create', isAuthenticated, isAdmin, async (req, res) => {
   try {
-    // 移除直接的db操作，改为通过模型层
     const itemData = {
       item_name: req.body.item_name,
       type: req.body.type,
       rarity: req.body.rarity
     };
-    // 修改为调用itemModel的创建方法
     const itemId = await itemModel.createTemplateItem(itemData);
 
     const dropData = {
@@ -55,17 +53,69 @@ router.post('/create', isAuthenticated, isAdmin, async (req, res) => {
       drop_rate: req.body.drop_rate,
       is_bind: req.body.is_bind ? 1 : 0
     };
-    // 修改为调用dropModel的创建方法
     await dropModel.createDrop(dropData);
 
     req.flash('success', '物品及掉落创建成功');
     res.redirect('/drops');
   } catch (error) {
-    await db.query('ROLLBACK');
+    // 修改：移除未定义的db操作
     req.flash('error', `创建失败: ${error.message}`);
     res.redirect('/drops/create');
   }
 });
+
+// 处理编辑掉落记录
+router.post('/edit/:id', isAuthenticated, isAdmin, async (req, res) => {
+  // 修改：使用正确的数据库连接
+  const connection = await db.getConnection(); // 获取数据库连接
+  try {
+    await connection.beginTransaction();
+
+    // 确保从请求参数获取正确的item_id
+    const itemId = parseInt(req.body.item_id);
+    if (!itemId) throw new Error('缺少物品ID');
+    
+    // 更新物品模板
+    const itemUpdate = await itemModel.updateTemplateItem(
+      itemId,
+      {
+        item_name: req.body.item_name,
+        type: req.body.type,
+        rarity: req.body.rarity,
+        is_bind: req.body.is_bind ? 1 : 0  // 添加is_bind字段
+      },
+      connection
+    );
+
+    // 更新掉落表
+    const dropUpdate = await dropModel.updateDrop(
+      req.params.id,
+      {
+        drop_rate: req.body.drop_rate,
+        is_bind: req.body.is_bind ? 1 : 0
+      },
+      connection
+    );
+
+    await connection.commit();
+    
+    if (dropUpdate) {
+      req.flash('success', '物品模板及掉落记录更新成功');
+    } else {
+      req.flash('error', '更新失败：找不到对应记录');
+    }
+    res.redirect('/drops');
+  } catch (error) {
+    // 修改：使用正确的连接对象进行回滚
+    await connection.rollback();
+    req.flash('error', `更新失败：${error.message}`);
+    res.redirect('/drops');
+  } finally {
+    // 新增：确保释放数据库连接
+    if (connection) connection.release();
+  }
+});
+
 
 // 编辑掉落记录页面
 router.get('/edit/:id', isAuthenticated, isAdmin, async (req, res) => {
@@ -83,23 +133,50 @@ router.get('/edit/:id', isAuthenticated, isAdmin, async (req, res) => {
   }
 });
 
-// 处理编辑掉落记录
+// 处理编辑掉落记录（错误处理补充）
+// 合并后的编辑路由处理（删除重复路由）
 router.post('/edit/:id', isAuthenticated, isAdmin, async (req, res) => {
+  const connection = await db.getConnection();
   try {
-    const success = await dropModel.updateDrop(req.params.id, req.body);
-    if (success) {
-      req.flash('success', '掉落记录更新成功');
-    } else {
-      req.flash('error', '未找到需要更新的记录');
-    }
+    await connection.beginTransaction();
+
+    const dropId = parseInt(req.params.id);
+    const itemId = parseInt(req.body.item_id);
+    
+    // 更新物品模板（新增template_is_bind处理）
+    await itemModel.updateTemplateItem(
+      itemId,
+      {
+        item_name: req.body.item_name,
+        type: req.body.type,
+        rarity: req.body.rarity,
+        is_bind: req.body.template_is_bind ? 1 : 0  // 新增模板绑定状态字段
+      },
+      connection
+    );
+
+    // 更新掉落记录（保持原有逻辑）
+    await dropModel.updateDrop(
+      dropId,
+      {
+        drop_rate: parseFloat(req.body.drop_rate),
+        is_bind: req.body.is_bind ? 1 : 0
+      },
+      connection
+    );
+
+    await connection.commit();
+    req.flash('success', '物品模板及掉落记录更新成功');
     res.redirect('/drops');
   } catch (error) {
-    req.flash('error', `更新失败: ${error.message}`);
+    await connection.rollback();
+    req.flash('error', `更新失败：${error.message}`);
     res.redirect('/drops');
+  } finally {
+    if (connection) connection.release();
   }
 });
 
-// 删除确认页面
 router.get('/delete/:id', isAuthenticated, isAdmin, async (req, res) => {
   try {
     const drop = await dropModel.getDropById(req.params.id);
@@ -107,30 +184,46 @@ router.get('/delete/:id', isAuthenticated, isAdmin, async (req, res) => {
       req.flash('error', '掉落记录不存在');
       return res.redirect('/drops');
     }
+    
+    // 获取关联的物品模板信息
+    const item = await itemModel.getTemplateItemById(drop.item_id);
+    
     res.render('drops/delete', {
-      title: '确认删除掉落记录',
+      title: '确认删除物品模板及掉落记录',
       drop,
-      session: req.session,
+      item, // 传递物品模板信息到视图
       flash: { error: req.flash('error') }
     });
   } catch (error) {
+    console.error('加载删除页面失败:', error);
     req.flash('error', '加载删除页面失败');
     res.redirect('/drops');
   }
 });
 
-// 处理删除操作（修改后）
-router.post('/delete/:id', isAuthenticated, isAdmin, async (req, res) => {
+// 处理删除操作（优化后）
+router.delete('/delete/:id', isAuthenticated, isAdmin, async (req, res) => {
   try {
-    const success = await dropModel.deleteDrop(req.params.id);
+    const dropId = parseInt(req.params.id);
+    // 新增存在性检查
+    const dropExists = await dropModel.getDropById(dropId);
+    if (!dropExists) {
+      req.flash('error', '要删除的掉落记录不存在');
+      return res.redirect('/drops');
+    }
+    
+    // 执行级联删除
+    const success = await dropModel.deleteDrop(dropId);
+    
     if (success) {
-      req.flash('success', '掉落记录及关联物品模板删除成功'); // 提示信息更新
+      req.flash('success', '物品模板及掉落记录删除成功');
     } else {
-      req.flash('error', '未找到需要删除的记录');
+      req.flash('error', '删除失败：未找到相关记录');
     }
     res.redirect('/drops');
   } catch (error) {
-    req.flash('error', error.message); // 直接使用事务中抛出的具体错误
+    console.error('删除处理失败:', error);
+    req.flash('error', `删除失败：${error.message}`);
     res.redirect('/drops');
   }
 });

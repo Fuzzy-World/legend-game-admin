@@ -1,7 +1,7 @@
 
    
   
-  <div class="container mt-5">
+<div class="container mt-5">
     <h1>创建新怪物</h1>
    
     <form action="/monsters/create" method="post">
@@ -44,6 +44,16 @@
         <select class="form-select" id="map_id" name="map_id" required>
           <% maps.forEach(map => { %>
             <option value="<%= map.map_id %>"><%= map.map_name %></option>
+          <% }); %>
+        </select>
+      </div>
+
+      <!-- 新增掉落表选择字段 -->
+      <div class="mb-3">
+        <label for="drop_table_id" class="form-label">掉落表</label>
+        <select class="form-select" id="drop_table_id" name="drop_table_id" required>
+          <% dropTables.forEach(table => { %>
+            <option value="<%= table.drop_table_id %>"><%= table.table_name %></option>
           <% }); %>
         </select>
       </div>

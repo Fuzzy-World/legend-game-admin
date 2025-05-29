@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= title %></title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  <div class="container mt-4">
+    <h2><%= title %></h2>
+    
+    <!-- 消息提示 -->
+    <% if (flash.success && flash.success.length > 0) { %>
+      <div class="alert alert-success"><%= flash.success[0] %></div>
+    <% } %>
+    <% if (flash.error && flash.error.length > 0) { %>
+      <div class="alert alert-danger"><%= flash.error[0] %></div>
+    <% } %>
+
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>物品名称</th>
+          <th>当前出价</th>
+          <th>结束时间</th>
+          <th>状态</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% auctions.forEach(auction => { %>
+          <tr>
+            <td><%= auction.item_name %></td>
+            <td><%= auction.current_highest_bid %>
+              <% if (auction.buy_now_price > 0) { %>
+                <br><small class="text-muted">一口价: <%= auction.buy_now_price %></small>
+              <% } %>
+            </td>
+            <td><%= auction.end_time %></td>
+            <td><%= auction.status %></td>
+            <td>
+              <!-- 仅上架中状态显示报价表单 -->
+              <% if (auction.status === '上架中') { %>
+                <form action="/auction/bid/<%= auction.auction_id %>" method="post">
+                  <div class="input-group">
+                    <input type="number" name="bidAmount" class="form-control" 
+                           min="<%= auction.current_highest_bid + 1 %>" 
+                           max="<%= auction.buy_now_price || 99999999 %>" 
+                           placeholder="<%= auction.buy_now_price > 0 ? '最低 ' + (auction.current_highest_bid + 1) + ' 或直接输入' + auction.buy_now_price : '' %>" 
+                           required>
+                    <button type="submit" class="btn btn-primary">报价</button>
+                  </div>
+                </form>
+              <% } %>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>

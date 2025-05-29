@@ -7,19 +7,27 @@
     <% } %>
     
     <form method="POST" action="/drops/edit/<%= drop.drop_table_id %>">
-        <!-- 物品名称（关联模板的下拉选择） -->
+        <!-- 添加隐藏字段保持item_id -->
+        <input type="hidden" name="item_id" value="<%= drop.item_id %>">
+        
         <div class="form-group">
             <label>物品模板名称</label>
-            <% const selectedItem = items.find(item => item.item_id === drop.item_id);%>
-            <input type="text" class="form-control" value="<%= selectedItem ? selectedItem.name : '未找到物品模板' %>" readonly>
-            <!-- 隐藏传递 item_id 给后端 -->
-            <input type="hidden" name="item_id" value="<%= drop.item_id %>">
+            <input type="text" class="form-control" 
+                   name="item_name" 
+                   value="<%= drop.item_name %>" 
+                   required>
         </div>
 
         <!-- 新增：物品类型（只读展示，参考 create 页结构） -->
         <div class="form-group">
             <label>物品类型</label>
-            <input type="text" class="form-control" value="<%= drop.type %>" readonly>  <!-- 从 drop 对象获取关联模板的类型 -->
+            <select name="type" class="form-control" required>
+                <option value="">请选择类型</option>
+                <option value="武器" <%= drop.type === '武器' ? 'selected' : '' %>>武器</option>
+                <option value="防具" <%= drop.type === '防具' ? 'selected' : '' %>>防具</option>
+                <option value="饰品" <%= drop.type === '饰品' ? 'selected' : '' %>>饰品</option>
+                <option value="消耗品" <%= drop.type === '消耗品' ? 'selected' : '' %>>消耗品</option>
+            </select>
         </div>
 
         <!-- 新增：稀有度（只读展示，参考 create 页结构） -->
@@ -28,18 +36,20 @@
             <input type="text" class="form-control" value="<%= drop.rarity %>" readonly>  <!-- 从 drop 对象获取关联模板的稀有度 -->
         </div>
 
+   
+
         <!-- 原掉落率字段 -->
         <div class="form-group">
             <label>掉落率(%)</label>
             <input type="number" name="drop_rate" class="form-control" min="0" max="100" value="<%= drop.drop_rate %>" required>
         </div>
 
-        <!-- 原是否绑定字段（标签与 create 页统一为“是否为主线物品”） -->
         <div class="form-group form-check">
-            <input type="hidden" name="is_bind" value="0"> <!-- 添加隐藏字段，未勾选时默认传0 -->
-            <input type="checkbox" name="is_bind" class="form-check-input" id="isBind" value="1" <%= drop.is_bind ? 'checked' : '' %>>
-            <label class="form-check-label" for="isBind">是否为主线物品</label>  <!-- 标签与 create 页统一 -->
+            <input type="checkbox" class="form-check-input" name="is_bind" id="isBind" <%= drop.is_bind ? 'checked' : '' %>>
+            <label class="form-check-label" for="isBind">是否为主线物品</label>
         </div>
+
+
 
         <button type="submit" class="btn btn-primary">更新</button>
         <a href="/drops" class="btn btn-secondary">取消</a>

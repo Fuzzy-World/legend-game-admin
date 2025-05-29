@@ -1,0 +1,76 @@
+<div class="container mt-4">
+    <h2>编辑物品实例 #<%= item.item_inst_id %></h2>
+    <form method="POST" action="/player-items/edit/<%= item.item_inst_id %>?_method=PUT">
+        <div class="mb-3">
+            <label class="form-label">角色</label>
+            <select class="form-select" name="char_id" required 
+                    <%= !session.user?.isAdmin && !characters.some(char => char.account_id === session.user.id) ? 'disabled' : '' %>>
+                <% if (characters && characters.length > 0) { %>
+                    <% if (session.user?.isAdmin) { %>
+                        <!-- 管理员可以看到并选择所有角色 -->
+                        <% characters.forEach(char => { %>
+                            <option value="<%= char.char_id %>" <%= item.char_id === char.char_id ? 'selected' : '' %>>
+                                <%= char.char_name %>（账号ID: <%= char.account_id %>）
+                            </option>
+                        <% }); %>
+                    <% } else { %>
+                        <!-- 非管理员用户只能看到自己账号下的角色 -->
+                        <% const userCharacters = characters.filter(char => char.account_id === session.user.id); %>
+                        <% if (userCharacters.length > 0) { %>
+                            <% userCharacters.forEach(char => { %>
+                                <option value="<%= char.char_id %>" <%= item.char_id === char.char_id ? 'selected' : '' %>>
+                                    <%= char.char_name %>
+                                </option>
+                            <% }); %>
+                        <% } else { %>
+                            <option value="" disabled selected>您没有可用的角色</option>
+                        <% } %>
+                    <% } %>
+                <% } else { %>
+                    <option value="" disabled selected>没有可用角色</option>
+                <% } %>
+            </select>
+            <% if (!session.user?.isAdmin && characters.some(char => char.account_id === session.user.id)) { %>
+                <!-- 仅当用户有可用角色时，不需要隐藏字段 -->
+            <% } else { %>
+                <input type="hidden" name="char_id" value="<%= item.char_id %>">
+            <% } %>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">物品</label>
+            <select class="form-select" name="item_id" required <%= !session.user?.isAdmin ? 'disabled' : '' %>>
+                <% items.forEach(itemTemplate => { %>
+                    <option value="<%= itemTemplate.item_id %>" <%= item.item_id === itemTemplate.item_id ? 'selected' : '' %>>
+                        <%= itemTemplate.item_name %>（ID: <%= itemTemplate.item_id %>）
+                    </option>
+                <% }); %>
+            </select>
+            <% if (!session.user?.isAdmin) { %>
+                <input type="hidden" name="item_id" value="<%= item.item_id %>">
+            <% } %>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">数量</label>
+            <input type="number" class="form-control" name="count" 
+                   value="<%= item.count %>" min="1" required <%= !session.user?.isAdmin ? 'readonly' : '' %>>
+        </div>
+
+        <div class="mb-3 form-check">
+            <input type="hidden" name="is_equipped" value="0">
+            <input type="checkbox" class="form-check-input" name="is_equipped" 
+                   id="is_equipped" value="1" <%= item.is_equipped ? 'checked' : '' %>>
+            <label class="form-check-label" for="is_equipped">是否装备</label>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">强化等级</label>
+            <input type="number" class="form-control" name="enhance_level"
+                   value="<%= item.enhance_level %>" min="0" <%= !session.user?.isAdmin ? 'readonly' : '' %>>
+        </div>
+
+        <button type="submit" class="btn btn-primary">保存修改</button>
+    <a href="javascript:history.back();" class="btn btn-secondary">返回</a>
+    </form>
+</div>

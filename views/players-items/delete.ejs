@@ -1,0 +1,8 @@
+<div class="container mt-5">
+    <h1>确认删除物品实例</h1>
+    <p>是否确认删除物品实例 ID 为 <%= item.item_inst_id %> 的记录？</p>
+    <form action="/player-items/delete/<%= item.item_inst_id %>" method="post">
+        <button type="submit" class="btn btn-danger">确认删除</button>
+        <a href="/player-items" class="btn btn-secondary">取消</a>
+    </form>
+</div>

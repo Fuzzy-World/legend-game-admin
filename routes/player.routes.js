@@ -1,10 +1,12 @@
+// 新增数据库引用
+const db = require('../config/db.config');
 const express = require('express');
 const router = express.Router();
 const playerModel = require('../models/player.model');
 const { isAuthenticated, isAdmin } = require('../middleware/auth.middleware');
 
-// 获取玩家列表（调整为普通用户可查看）
-router.get('/', isAuthenticated, async (req, res) => {  // 移除了isAdmin中间件
+
+router.get('/', isAuthenticated, isAdmin,async (req, res) => {  // 移除了isAdmin中间件
   try {
     const players = await playerModel.getAllPlayers();
     // 获取 flash 消息
@@ -26,7 +28,7 @@ router.get('/', isAuthenticated, async (req, res) => {  // 移除了isAdmin中�
   }
 });
 
-router.get('/create', isAuthenticated, isAdmin, async (req, res) => {
+router.get('/create', isAuthenticated, async (req, res) => {  // 移除isAdmin
   try {
     // 获取 flash 消息
     const flash = {
@@ -46,7 +48,7 @@ router.get('/create', isAuthenticated, isAdmin, async (req, res) => {
 });
 
 // 处理创建玩家的 POST 请求（新增邮箱唯一性验证）
-router.post('/create', isAuthenticated, isAdmin, async (req, res) => {
+router.post('/create', isAuthenticated, async (req, res) => {  // 移除isAdmin
   try {
     const playerData = req.body;
     
@@ -81,7 +83,7 @@ router.post('/create', isAuthenticated, isAdmin, async (req, res) => {
 });
 
 // 显示编辑玩家表单（修正后）
-router.get('/edit/:id', isAuthenticated, async (req, res) => {
+router.get('/edit/:id', isAuthenticated, async (req, res) => {  // 移除isAdmin
   try {
     // 1. 验证ID是否存在且为有效数字
     const playerId = req.params.id;
@@ -116,23 +118,37 @@ router.post('/edit/:id', isAuthenticated, async (req, res) => {
   try {
     const playerId = req.params.id;
     const playerData = req.body;
+    
+    // 1. 获取目标玩家信息
+    const player = await playerModel.getPlayerById(playerId);
+    if (!player) {
+      req.flash('error', '玩家不存在');
+      return res.redirect('/players');
+    }
+
+    // 2. 校验当前用户account_id与目标玩家account_id是否一致
+    const currentAccountId = req.session.user.id;  // 从会话获取当前用户account_id
+    if (player.account_id !== currentAccountId) {
+      req.flash('error', '无权限操作其他账户的玩家');
+      return res.redirect('/players');
+    }
+
+    // 3. 执行更新（原有逻辑）
     const success = await playerModel.updatePlayer(playerId, playerData);
     if (success) {
       req.flash('success', '玩家信息更新成功');
     } else {
-      // 新增：当 affectedRows 为 0 时提示（可能因数据未变化或 ID 不存在）
       req.flash('error', '未找到需要更新的玩家或数据未变化');
     }
     res.redirect('/players');
   } catch (error) {
-    // 新增：捕获 model 层抛出的异常并提示具体错误
     req.flash('error', `更新失败：${error.message}`);
     res.redirect('/players');
   }
 });
 
 // 显示删除确认页面（修正后）
-router.get('/delete/:id', isAuthenticated, isAdmin, async (req, res) => {
+router.get('/delete/:id', isAuthenticated, async (req, res) => {  // 移除isAdmin
   try {
     const player = await playerModel.getPlayerById(req.params.id);
     if (!player) {
@@ -152,17 +168,23 @@ router.get('/delete/:id', isAuthenticated, isAdmin, async (req, res) => {
 });
 
 // 处理实际删除操作
-router.post('/delete/:id', isAuthenticated, isAdmin, async (req, res) => {
+router.post('/delete/:id', isAuthenticated, async (req, res) => {  // 移除isAdmin
   try {
     const success = await playerModel.deletePlayer(req.params.id);
     if (success) {
-      req.flash('success', '玩家删除成功');
+      // 移除以下多余的拍卖行删除操作（已在模型层处理）
+      // await db.execute(...);
+      req.flash('success', '玩家及其关联数据删除成功');
     } else {
       req.flash('error', '玩家删除失败');
     }
     res.redirect('/players');
   } catch (error) {
-    req.flash('error', '删除玩家失败');
+    console.error('删除失败详情:', error);
+    const errorMessage = error.message.includes('foreign key') 
+      ? '存在未处理的关联数据，请检查拍卖行、角色或物品数据' 
+      : error.message;
+    req.flash('error', `删除失败：${errorMessage}`);
     res.redirect('/players');
   }
 });

@@ -2,14 +2,11 @@ const express = require('express');
 const router = express.Router();
 const auctionModel = require('../models/auction.model');
 const { isAuthenticated, isAdmin } = require('../middleware/auth.middleware');
-const itemModel = require('../models/item.model');
+const itemModel = require('../models/itemtemp.model');
 
 router.get('/', async (req, res) => {
   try {
-    console.log('[DEBUG] 开始查询拍卖列表...');
     const auction = await auctionModel.getActiveauction();
-    console.log(`[DEBUG] 成功获取拍卖列表，共${auction.length}条记录`);
-      
     res.render('auction/index', { 
         title: '拍卖列表',
         auction,
@@ -111,9 +108,13 @@ router.get('/edit/:id', isAuthenticated, isAdmin, async (req, res) => {
 // 处理编辑表单提交
 router.post('/edit/:id', isAuthenticated, isAdmin, async (req, res) => {
   try {
-    const { status, current_highest_bid, end_time } = req.body;
+    const { status, buy_now_price, current_highest_bid, end_time } = req.body; // 新增buy_now_price
     const success = await auctionModel.updateAuction(
-      req.params.id, status, current_highest_bid, end_time
+      req.params.id, 
+      status,
+      buy_now_price,  // 新增参数
+      current_highest_bid, 
+      end_time
     );
     
     if (success) {
@@ -164,4 +165,63 @@ router.post('/delete/:id', isAuthenticated, isAdmin, async (req, res) => {
   }
 });
 
-module.exports = router;    
+// 处理用户报价
+router.post('/bid/:id', isAuthenticated, async (req, res) => {
+  try {
+    const auctionId = req.params.id;
+    const bidAmount = parseFloat(req.body.bidAmount);
+    const bidderCharId = req.session.user?.char_id;  // 使用角色ID（char_id）
+    
+    // 参数校验
+    if (!auctionId) {
+      console.error('报价失败：auctionId未提供');
+      req.flash('error', '报价失败：拍卖ID缺失');
+      return res.redirect('/user/auctions');
+    }
+    if (isNaN(bidAmount)) {
+      console.error('报价失败：bidAmount无效，原始输入:', req.body.bidAmount);
+      req.flash('error', '报价失败：请输入有效的数字金额');
+      return res.redirect('/user/auctions');
+    }
+    if (!bidderCharId) {
+      console.error('报价失败：bidderCharId未获取到，session.user:', req.session.user);
+      req.flash('error', '报价失败：用户未关联角色或会话异常');
+      return res.redirect('/login');
+    }
+
+    const success = await auctionModel.updateBid(
+      auctionId, 
+      bidAmount, 
+      bidderCharId  // 新增最后一个参数作为last_bidder_id
+    );
+    
+    if (success) {
+      const auction = await auctionModel.getAuctionById(auctionId);
+      if (!auction) {
+        req.flash('error', '拍卖已结束或不存在');
+        return res.redirect('/user/auctions');
+      }
+      
+      // 移除不必要的重定向，使用定时器延迟设置flash消息
+      setTimeout(() => {
+        if (auction?.buy_now_price && bidAmount >= auction.buy_now_price) {
+          req.flash('success', '恭喜！已通过一口价直接购买成功！');
+        } else {
+          req.flash('success', '报价成功！');
+        }
+      }, 1500);
+      
+      // 立即重定向，而不是在定时器中
+      res.redirect('/user/auctions');
+    } else {
+      req.flash('error', '报价失败：出价不够高或拍卖已结束');
+      return res.redirect('/user/auctions');
+    }
+  } catch (error) {
+    console.error('报价错误:', error);
+    req.flash('error', '报价时发生系统错误');
+    res.redirect('/user/auctions');
+  }
+});
+
+module.exports = router;

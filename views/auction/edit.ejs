@@ -22,6 +22,12 @@
              value="<%= auction.current_highest_bid %>" min="0">
     </div>
 
+    <div class="col-md-6">
+      <label class="form-label">一口价</label>
+      <input type="number" class="form-control" name="buy_now_price" 
+             value="<%= auction.buy_now_price %>" min="0">
+    </div>
+
     <div class="col-md-12">
       <label class="form-label">结束时间</label>
       <input type="datetime-local" class="form-control" name="end_time" 

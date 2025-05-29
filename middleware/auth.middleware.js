@@ -18,7 +18,7 @@ module.exports = {
       next();
     } else {
       req.flash('error', '需要管理员权限');
-      res.redirect('/monsters');
+      res.redirect('/user/characters');
     }
   }
 };

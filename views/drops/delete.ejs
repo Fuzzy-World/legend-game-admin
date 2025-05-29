@@ -13,7 +13,14 @@
         </ul>
     </div>
 
-    <form method="POST" action="/drops/delete/<%= drop.drop_table_id %>?_method=DELETE">
+    <!-- 在表单前添加错误提示 -->
+    <% if (typeof error !== 'undefined' && error) { %>
+      <div class="alert alert-danger"><%= error %></div>
+    <% } %>
+    
+    <!-- 修改表单提交方式 -->
+    <form action="/drops/delete/<%= drop.drop_table_id %>?_method=DELETE" method="POST">
+      <input type="hidden" name="_method" value="DELETE">
         <button type="submit" class="btn btn-danger">确认删除</button>
         <a href="/drops" class="btn btn-secondary">取消</a>
     </form>

@@ -1,7 +1,28 @@
  
 <div class="container mt-4">
   <h2><%= title %></h2>
-   <!-- 消息提示（修正后） -->
+  
+  <!-- 添加账户筛选表单 -->
+  <% if (session.user && session.user.isAdmin) { %>
+    <form method="get" action="/characters" class="mb-3">
+      <div class="row g-3 align-items-center">
+        <div class="col-auto">
+          <label class="form-label">按账户ID筛选</label>
+        </div>
+        <div class="col-auto">
+          <input type="number" name="account_id" class="form-control" 
+                 value="<%= filterAccountId || '' %>" 
+                 placeholder="输入账户ID">
+        </div>
+        <div class="col-auto">
+          <button type="submit" class="btn btn-outline-primary">筛选</button>
+          <a href="/characters" class="btn btn-outline-secondary">清空筛选</a>
+        </div>
+      </div>
+    </form>
+  <% } %>
+
+  <!-- 消息提示（修正后） -->
    <% if (flash.success && flash.success.length > 0) { %>
     <div class="alert alert-success"><%= flash.success[0] %></div>
   <% } %>
