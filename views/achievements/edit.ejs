@@ -1,0 +1,47 @@
+
+<div class="container mt-4">
+    <h2 class="mb-4">编辑成就模板</h2>
+    
+    <form method="POST" action="/achievements/edit/<%= achievement.achievement_id %>">
+        <div class="mb-3">
+            <label class="form-label">成就名称</label>
+            <input type="text" class="form-control" name="achievement_name" 
+                   value="<%= achievement.achievement_name %>" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">成就类型</label>
+            <select class="form-select" name="achievement_type" required>
+                <% const types = ['等级', '装备', '任务', 'PVP', '探索']; %>
+                <% types.forEach(type => { %>
+                <option value="<%= type %>" 
+                    <%= achievement.achievement_type === type ? 'selected' : '' %>>
+                    <%= type %>
+                </option>
+                <% }); %>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">描述</label>
+            <textarea class="form-control" name="description" rows="3">
+                <%= achievement.description %>
+            </textarea>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">积分</label>
+            <input type="number" class="form-control" name="points" 
+                   value="<%= achievement.points %>" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">图标路径</label>
+            <input type="text" class="form-control" name="icon_path"
+                   value="<%= achievement.icon_path %>">
+        </div>
+
+        <button type="submit" class="btn btn-primary">保存修改</button>
+        <a href="/achievements" class="btn btn-secondary">取消</a>
+    </form>
+</div>

@@ -1,0 +1,91 @@
+
+<div class="container mt-4">
+    <h2>我的公会成员</h2>
+    
+    <% if (guilds.length === 0) { %>
+        <div class="alert alert-info">您尚未加入任何公会</div>
+    <% } else { %>
+        <!-- 先对公会进行分组处理 -->
+        <% const guildGroups = {}; %>
+        <% guilds.forEach(guild => { %>
+            <% if (!guildGroups[guild.guild_id]) { %>
+                <% guildGroups[guild.guild_id] = {
+                    guild_id: guild.guild_id,
+                    guild_name: guild.guild_name,
+                    members: [],
+                    myRole: null
+                }; %>
+            <% } %>
+            <% guildGroups[guild.guild_id].members.push(guild); %>
+            <% if (guild.char_id === session.user.char_id) { %>
+                <% guildGroups[guild.guild_id].myRole = guild.role; %>
+            <% } %>
+        <% }); %>
+        
+        <% const guildList = Object.values(guildGroups); %>
+        <% if (guildList.length === 0) { %>
+            <div class="alert alert-info">您加入的公会暂无成员数据</div>
+        <% } else { %>
+            <% guildList.forEach(guild => { %>
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><%= guild.guild_name %> (ID: <%= guild.guild_id %>)</h5>
+                        <span class="badge bg-primary">成员: <%= guild.members.length %></span>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-3">
+                            <div>
+                                <span class="text-muted">您的职位:</span> 
+                                <span class="font-weight-bold text-<%= guild.myRole === '会长' ? 'danger' : 
+                                                          guild.myRole === '副会长' ? 'info' : 
+                                                          guild.myRole === '管理员' ? 'primary' : 'secondary' %>">
+                                    <%= guild.myRole %>
+                                </span>
+                            </div>
+                            <div>
+                                <span class="text-muted">当前在线:</span> 
+                                <span class="font-weight-bold text-success">
+                                    <%= guild.members.filter(m => m.last_active > (new Date().getTime() - 86400000)).length %>
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead class="thead-dark">
+                                    <tr>
+                                        <th>角色名称</th>
+                                        <th>等级</th>
+                                        <th>职位</th>
+                                        <th>战力</th>
+                                        <th>加入时间</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% guild.members.sort((a, b) => b.level - a.level).forEach(member => { %>
+                                    <tr class="<%= member.char_id === session.user.char_id ? 'table-active' : '' %>">
+                                        <td><%= member.char_name %></td>
+                                        <td><span class="badge bg-success"><%= member.level %></span></td>
+                                        <td>
+                                            <span class="badge <%= member.role === '会长' ? 'bg-danger' : 
+                                                          member.role === '副会长' ? 'bg-info' : 
+                                                          member.role === '管理员' ? 'bg-primary' : 'bg-secondary' %>">
+                                                <%= member.role %>
+                                            </span>
+                                        </td>
+                                        <td><%= member.attack + member.defense + member.level * 5 %></td>
+                                        <td>
+                                            <% const lastActive = new Date(member.last_active); %>
+                                            <%= lastActive.toLocaleString() %>
+                                        </td>
+                                    </tr>
+                                    <% }); %>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            <% }); %>
+        <% } %>
+    <% } %>
+</div>

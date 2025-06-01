@@ -1,0 +1,34 @@
+
+<div class="container mt-4">
+  <h2><%= title %></h2>
+
+  <a href="/guilds/create" class="btn btn-primary mb-3">新建公会</a>
+
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>公会名称</th>
+        <th>会长ID</th>
+        <th>等级</th>
+        <th>成员数量</th>
+        <th>创建时间</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% guilds.forEach(g => { %>
+        <tr>
+          <td><%= g.guild_name %></td>
+          <td><%= g.leaderCharId || '无' %></td>
+          <td><%= g.level %></td>
+          <td><%= g.member_count %></td>
+          <td><%= new Date(g.createdAt).toLocaleDateString() %></td>
+          <td>
+            <a href="/guilds/edit/<%= g.guild_id %>" class="btn btn-sm btn-primary">编辑</a>
+            <a href="/guilds/delete/<%= g.guild_id %>" class="btn btn-sm btn-danger">删除</a>
+          </td>
+        </tr>
+      <% }); %>
+    </tbody>
+  </table>
+</div>

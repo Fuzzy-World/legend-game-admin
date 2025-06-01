@@ -1,0 +1,42 @@
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>邮件详情</h2>
+        <a href="/user/mails" class="btn btn-secondary">返回列表</a>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h4 class="mb-0"><%= mail.title %></h4>
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <p><strong>发件人：</strong><%= mail.sender_name || '系统邮件' %></p>
+                    <p><strong>发送时间：</strong><%= new Date(mail.send_time).toLocaleString() %></p>
+                </div>
+                <% if (mail.attachments.length > 0) { %>
+                <div class="col-md-6">
+                    <h5>附件：</h5>
+                    <ul class="list-unstyled">
+                        <% mail.attachments.forEach(att => { %>
+                        <li>
+                            <i class="bi bi-paperclip"></i>
+                             <%= mail.item_name %> × <%= att.count %>
+                        </li>
+                        <% }) %>
+                    </ul>
+                </div>
+                <% } %>
+            </div>
+
+            <div class="border-top pt-3">
+                <h5>邮件内容：</h5>
+                <p class="text-muted"><%= mail.content %></p>
+            </div>
+        </div>
+        <div class="card-footer">
+            
+        </div>
+    </div>
+</div>

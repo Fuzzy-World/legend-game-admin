@@ -2,7 +2,7 @@ const db = require('../config/db.config'); // 修改为正确路径
 
 module.exports = {
   getAllCharacters: async () => {
-    const [rows] = await db.query('SELECT * FROM `character`');
+    const [rows] = await db.query('SELECT * FROM v_character_full_stats');
     return rows;
   },
 
@@ -13,7 +13,7 @@ module.exports = {
 
   // 新增：按账户ID获取角色列表
   getCharactersByAccountId: async (accountId) => {
-    const [rows] = await db.query('SELECT * FROM `character` WHERE account_id = ?', [accountId]);
+    const [rows] = await db.query('SELECT * FROM v_character_full_stats WHERE account_id = ?', [accountId]);
     return rows;
   },
 

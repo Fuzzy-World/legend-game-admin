@@ -1,0 +1,37 @@
+
+
+<div class="container mt-4">
+    <h2 class="mb-4">删除成就模板</h2>
+    
+    <% if (messages.error) { %>
+        <div class="alert alert-danger"><%= messages.error %></div>
+    <% } %>
+
+    <% if (achievement) { %>
+        <div class="card border-danger">
+            <div class="card-body">
+                <h5 class="card-title text-danger"><i class="bi bi-exclamation-triangle-fill"></i> 确认删除成就</h5>
+                <dl class="row">
+                    <dt class="col-sm-3">成就ID</dt>
+                    <dd class="col-sm-9"><%= achievement.achievement_id %></dd>
+                    
+                    <dt class="col-sm-3">成就名称</dt>
+                    <dd class="col-sm-9"><%= achievement.achievement_name %></dd>
+                    
+                    <dt class="col-sm-3">成就类型</dt>
+                    <dd class="col-sm-9"><%= achievement.achievement_type %></dd>
+                </dl>
+                
+                <form action="/achievements/delete/<%= achievement.achievement_id %>" method="POST">
+                    <input type="hidden" name="_method" value="DELETE">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash-fill"></i> 确认删除
+                    </button>
+                    <a href="/achievements" class="btn btn-secondary">返回列表</a>
+                </form>
+            </div>
+        </div>
+    <% } else { %>
+        <div class="alert alert-warning">未找到指定成就</div>
+    <% } %>
+</div>

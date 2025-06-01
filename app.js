@@ -10,6 +10,8 @@ const itemRoutes = require('./routes/item.routes');
 const monsterRoutes = require('./routes/monster.routes');
 const playerItemRoutes = require('./routes/player.item.routes');
 const userRouter = require('./routes/user.routes');
+const achievementRoutes = require('./routes/achievement.routes');
+const guildRoutes = require('./routes/guild.routes');
 
 
 // 在app.js或入口文件中
@@ -93,6 +95,10 @@ app.use('/maps', require('./routes/map.routes'));
 app.use('/monsters', require('./routes/monster.routes')); // 确保在拍卖路由之后
 app.use('/player-items', require('./routes/player.item.routes'));
 app.use('/user', require('./routes/user.routes'));
+app.use('/achievements', require('./routes/achievement.routes'));
+app.use('/guilds',require('./routes/guild.routes'));
+
+
 // 404错误处理
 app.use((req, res, next) => {
   res.status(404).render('error', { title: '404 Not Found', message: '页面未找到' });
@@ -103,3 +109,4 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`服务器运行在端口 ${PORT}`);
 });
+

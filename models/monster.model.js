@@ -6,11 +6,7 @@ class MonsterTemplate {
   static async getAllMonsters() {
     try {
       const [rows] = await pool.execute(`
-        SELECT mt.*, mi.map_name, it.item_name AS drop_item_name
-        FROM monster_template mt
-        LEFT JOIN map_info mi ON mt.map_id = mi.map_id
-        LEFT JOIN drop_table dt ON mt.drop_table_id = dt.drop_table_id
-        LEFT JOIN item_template it ON dt.item_id = it.item_id  -- 新增与item_template的连接
+        SELECT * FROM v_monster_drop_details ;
       `);
       return rows || [];
     } catch (error) {

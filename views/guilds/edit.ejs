@@ -1,0 +1,22 @@
+<div class="container mt-4">
+  <h2>编辑公会</h2>
+  
+  <form method="post">
+    <input type="hidden" name="guild_id" value="<%= guild.guild_id %>">
+    
+    <div class="mb-3">
+      <label class="form-label">公会名称</label>
+      <input type="text" class="form-control" name="guild_name" 
+             value="<%= guild.guild_name %>" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">会长ID</label>
+      <input type="number" class="form-control" name="leader_id" 
+             value="<%= guild.leader_id %>" required>
+    </div>
+
+    <button type="submit" class="btn btn-primary">保存修改</button>
+    <a href="/guilds" class="btn btn-secondary">返回</a>
+  </form>
+</div>

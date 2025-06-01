@@ -1,0 +1,43 @@
+
+<div class="container mt-4">
+    <h2 class="mb-4">成就模板管理</h2>
+    
+    <% if (messages.success) { %>
+        <div class="alert alert-success"><%= messages.success %></div>
+    <% } %>
+    <% if (messages.error) { %>
+        <div class="alert alert-danger"><%= messages.error %></div>
+    <% } %>
+
+    <div class="mb-3">
+        <a href="/achievements/create" class="btn btn-primary">新建成就模板</a>
+    </div>
+
+    <table class="table table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>成就ID</th>
+                <th>成就名称</th>
+                <th>成就类型</th>
+                <th>描述</th>
+                <th>积分</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% achievements.forEach(achievement => { %>
+            <tr>
+                <td><%= achievement.achievement_id %></td>
+                <td><%= achievement.achievement_name %></td>
+                <td><%= achievement.achievement_type %></td>
+                <td><%= achievement.description %></td>
+                <td><%= achievement.points %></td>
+                <td>
+                    <a href="/achievements/edit/<%= achievement.achievement_id %>" class="btn btn-sm btn-warning">编辑</a>
+                    <a href="/achievements/delete/<%= achievement.achievement_id %>" class="btn btn-sm btn-warning">删除</a>
+                </td>
+            </tr>
+            <% }); %>
+        </tbody>
+    </table>
+</div>

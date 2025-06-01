@@ -1,0 +1,95 @@
+<div class="container mt-5">
+  <h1><%= title || '创建公会' %></h1>
+  <!-- 成功提示 -->
+  <% if (success) { %>
+    <div class="alert alert-success mb-4" role="alert">
+      <%= success %>
+    </div>
+    <% } %>
+    
+    <!-- 错误提示 -->
+    <% if (error) { %>
+    <div class="alert alert-danger mb-4" role="alert">
+      <%= error %>
+    </div>
+    <% } %>
+
+  <form method="post" action="/guilds/create" class="needs-validation" novalidate>
+    
+    <div class="mb-3">
+      <label for="guild_name" class="form-label">公会名称</label>
+      <input 
+        type="text" 
+        class="form-control" 
+        id="guild_name" 
+        name="guild_name" 
+        required
+        minlength="2" 
+        maxlength="20"
+        placeholder="请输入公会名称（2-20字符，唯一）"
+      >
+      <div class="invalid-feedback">请输入有效的公会名称</div>
+    </div>
+    
+    <div class="mb-3">
+      <label for="founder_id" class="form-label">会长ID</label>
+      <input 
+        type="number" 
+        class="form-control" 
+        id="founder_id" 
+        name="founder_id" 
+        required
+        min="1"
+        value="<%= currentCharId || '' %>"  <!-- 自动填充当前角色ID -->
+      <div class="form-text">默认填充当前登录角色ID</div>
+      <div class="invalid-feedback">请输入有效的角色ID</div>
+    </div>
+
+    <!-- 加载状态按钮 -->
+    <button 
+      type="submit" 
+      class="btn btn-primary"
+      id="submitBtn"
+    >
+      <span id="btnText">创建公会</span>
+      <span id="btnLoader" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+    </button>
+    <a href="/guilds" class="btn btn-secondary">返回列表</a>
+  </form>
+</div>
+
+<script>
+  // 表单提交前验证和加载状态处理
+  document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form[class="needs-validation"]');
+    const submitBtn = document.getElementById('submitBtn');
+    const btnText = document.getElementById('btnText');
+    const btnLoader = document.getElementById('btnLoader');
+    
+    form.addEventListener('submit', function(event) {
+      // 阻止表单提交直到验证通过
+      if (!form.checkValidity()) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      
+      // 显示加载状态
+      submitBtn.disabled = true;
+      btnText.classList.add('d-none');
+      btnLoader.classList.remove('d-none');
+      
+      // 这里可以添加AJAX提交逻辑或保持表单提交
+    });
+    
+    // 为表单元素添加实时验证反馈
+    const inputs = form.querySelectorAll('input[required]');
+    inputs.forEach(input => {
+      input.addEventListener('blur', function() {
+        this.setCustomValidity('');
+        if (!this.checkValidity()) {
+          this.setCustomValidity('请输入有效的值');
+        }
+      });
+    });
+  });
+</script>

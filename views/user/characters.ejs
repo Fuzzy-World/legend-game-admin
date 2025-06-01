@@ -1,3 +1,4 @@
+
 <div class="container mt-4">
   <h2>我的角色</h2>
   
@@ -14,23 +15,36 @@
   <table class="table table-striped">
     <thead>
       <tr>
+        <th>所属账户</th>
         <th>角色名称</th>
         <th>等级</th>
-        <th>血量</th>
-        <th>攻击</th>
-        <th>防御</th>
-        <th>操作</th> <!-- 新增：操作列 -->
+        <th>最大血量</th>
+        <th>基础攻击</th>
+        <th>基础防御</th>
+        <th>装备攻击</th>
+        <th>装备防御</th>
+        <th>总攻击</th>
+        <th>总防御</th>
+        <th>角色id</th>
+        <th>操作</th><!-- 新增：操作列 -->
       </tr>
     </thead>
     <tbody>
       <% if (characters && characters.length > 0) { %>  <!-- 新增空值检查 -->
         <% characters.forEach(c => { %>
           <tr>
-            <td><%= c.char_name %></td>
-            <td><%= c.level %></td>
-            <td><%= c.hp_max %></td>
-            <td><%= c.attack %></td>
-            <td><%= c.defense %></td><td>
+            <td><%= c.account_id %></td>
+          <td><%= c.char_name %></td>
+          <td><%= c.level %></td>
+          <td><%= c.hp_max %></td>
+          <td><%= c.attack %></td>
+          <td><%= c.defense %></td>
+          <td><%= c.equip_attack || '无'%></td>
+          <td><%= c.equip_defense || '无'%></td>
+          <td><%= c.total_attack %></td>
+          <td><%= c.total_defense %></td>
+          <td><%= c.char_id %></td>
+          <td>
               <a href="/characters/delete/<%= c.char_id %>" class="btn btn-sm btn-danger">删除</a>
             </td> 
             
@@ -39,7 +53,7 @@
         <% }); %>
       <% } else { %>  <!-- 无角色时的提示 -->
         <tr>
-          <td colspan="6" class="text-center">暂无角色</td>
+          <td colspan="100%" class="text-center">暂无角色</td>
         </tr>
       <% } %>
     </tbody>

@@ -1,31 +1,92 @@
+
 <div class="container mt-4">
     <h2>我的物品</h2>
+    
     <% if (items.length === 0) { %>
-        <div class="alert alert-info">暂无物品实例</div>
+        <div class="alert alert-info">暂无角色物品数据</div>
     <% } else { %>
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>所属角色</th>
-                    <th>物品名称</th>
-                    <th>数量</th>
-                    <th>是否装备</th>
-                    <th>操作</th>
-                </tr>
-            </thead>
-            <tbody>
-                <% items.forEach(item => { %>
-                    <tr>
-                        <td><%= item.char_name || '未绑定' %></td>
-                        <td><%= item.item_name %></td>
-                        <td><%= item.count %></td>
-                        <td><%= item.is_equipped ? '✅' : '❌' %></td>
-                        <td>
-                            <a href="/player-items/edit/<%= item.item_inst_id %>" class="btn btn-sm btn-primary">编辑</a>
-                        </td>
-                    </tr>
-                <% }); %>
-            </tbody>
-        </table>
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <p><strong>角色ID:</strong> <%= items[0].char_id %></p>
+                    </div>
+                    <div class="col-md-3">
+                        <p><strong>角色名称:</strong> <%= items[0].char_name %></p>
+                    </div>
+                    <div class="col-md-3">
+                        <p><strong>物品总数:</strong> <%= items.length %></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">物品列表</div>
+            <div class="card-body">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>物品ID</th>
+                            <th>物品名称</th>
+                            <th>物品类型</th>
+                            <th>稀有度</th>
+                            <th>数量</th>
+                            <th>是否装备</th>
+                            <th>强化等级</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% items.forEach(item => { %>
+                        <tr>
+                            <td><%= item.item_inst_id %></td>
+                            <td><%= item.item_name %></td>
+                            <td><%= item.item_type %></td>
+                            <td><%= item.rarity %></td>
+                            <td><%= item.count %></td>
+                            <td><%= item.is_equipped ? '是' : '否' %></td>
+                            <td><%= item.enhance_level %></td>
+                            <td>
+                                <a href="/player-items/edit/<%= item.item_inst_id %>" class="btn btn-sm btn-primary">编辑</a>
+                            </td>
+                        </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header">物品统计</div>
+            <div class="card-body">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>物品类型</th>
+                            <th>数量</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>武器</td>
+                            <td><%= items.filter(item => item.item_type === '武器').length %></td>
+                        </tr>
+                        <tr>
+                            <td>防具</td>
+                            <td><%= items.filter(item => item.item_type === '防具').length %></td>
+                        </tr>
+                        <tr>
+                            <td>饰品</td>
+                            <td><%= items.filter(item => item.item_type === '饰品').length %></td>
+                        </tr>
+                        <tr>
+                            <td>消耗品</td>
+                            <td><%= items.filter(item => item.item_type === '消耗品').length %></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     <% } %>
 </div>

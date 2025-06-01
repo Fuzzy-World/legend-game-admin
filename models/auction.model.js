@@ -1,69 +1,51 @@
 const db = require('../config/db.config');
 
-
-
-// 修改后（获取所有拍卖记录）
+// 获取所有拍卖记录（修正版）
 async function getActiveauction() {
   const [rows] = await db.execute(`
-    SELECT 
-      a.*,
-      a.buy_now_price,
-      t.item_name,  
-      acc.email AS seller_email
-    FROM auction_item a
-    JOIN player_item i ON a.item_inst_id = i.item_inst_id  -- 修正关联条件
-    JOIN item_template t ON i.item_id = t.item_id          -- 使用i.item_id关联模板表
-    JOIN \`character\` c ON a.seller_id = c.char_id
-    JOIN account acc ON c.account_id = acc.account_id
-    ORDER BY a.end_time DESC  
+      SELECT * FROM v_auction_items 
+ORDER BY 
+    CASE 状态 
+        WHEN '上架中' THEN 1 
+        WHEN '已完成' THEN 2 
+        WHEN '流拍' THEN 3 
+    END;
   `);
   return rows;
 }
 
+
+
 // 更新最高出价
+// 更新最高出价（简化版，仅更新价格和出价者，其他逻辑由触发器处理）
 async function updateBid(id, bidAmount, bidderId) {
   const connection = await db.getConnection();
   try {
     await connection.beginTransaction();
     
-    const [auction] = await connection.execute(
-      `SELECT 
-        a.auction_id,
-        a.current_highest_bid,
-        a.buy_now_price 
-       FROM auction_item a
-       WHERE a.auction_id = ? 
-       AND a.end_time > NOW() 
-       AND (a.current_highest_bid < ? OR ? >= a.buy_now_price)`,
-      [id, bidAmount, bidAmount]
+    const [charResult] = await connection.execute(
+      'SELECT char_id FROM `character` WHERE account_id = ? LIMIT 1',
+      [bidderId]
     );
-    
-    if (auction.length === 0) {
-      await connection.rollback();
-      return false;
-    }
+    if (charResult.length === 0) throw new Error('用户未创建游戏角色');
+    const bidderCharId = charResult[0].char_id;
 
-    const newStatus = bidAmount >= auction[0].buy_now_price ? '已完成' : '上架中';
-    
-    // 修改SQL添加last_bid_time字段
     const [result] = await connection.execute(
-      `UPDATE auction_item SET 
-        current_highest_bid = ?,
-        last_bidder_id = ?,
-        status = ?, 
-        last_bid_time = NOW(), 
-        end_time = IF(? >= buy_now_price, NOW(), end_time) 
-      WHERE auction_id = ?`,
-      [bidAmount, bidderId, newStatus, bidAmount, id]
+      `UPDATE auction_item 
+       SET current_highest_bid = ?, 
+           last_bidder_id = ?,
+           last_bid_time = NOW()
+       WHERE auction_id = ? 
+         AND end_time > NOW() 
+         AND current_highest_bid < ? 
+         AND status = '上架中'`,
+      [bidAmount, bidderId, id, bidAmount]
     );
     
-    const success = result.affectedRows > 0;
-    if (success) {
-      await connection.commit();
-    } else {
-      await connection.rollback();
-    }
-    return success;
+    if (result.affectedRows === 0) throw new Error('报价失败（竞态条件）');
+    
+    await connection.commit();
+    return true;
   } catch (error) {
     await connection.rollback();
     throw error;
@@ -78,7 +60,7 @@ async function deleteAuction(id) {
   return result.affectedRows > 0;
 }
 
-// 根据ID获取拍卖详情
+// 根据ID获取拍卖详情（修正版）
 async function getAuctionById(id) {
   try {
     const [rows] = await db.execute(`
@@ -87,7 +69,8 @@ async function getAuctionById(id) {
         COALESCE(t.item_name, '已删除物品') AS item_name,
         COALESCE(c.char_name, '未知卖家') AS seller_name 
       FROM auction_item a
-      LEFT JOIN item_template t ON a.item_inst_id = t.item_id
+      LEFT JOIN player_item i ON a.item_inst_id = i.item_inst_id
+      LEFT JOIN item_template t ON i.item_id = t.item_id
       LEFT JOIN \`character\` c ON a.seller_id = c.char_id
       WHERE auction_id = ?`, [id]);
     
@@ -114,7 +97,8 @@ async function getUserauction(userId) {
   const [rows] = await db.execute(`
     SELECT a.*, t.item_name
     FROM auction_item a
-    JOIN item_template t ON a.item_inst_id = t.item_id
+    JOIN player_item i ON a.item_inst_id = i.item_inst_id
+    JOIN item_template t ON i.item_id = t.item_id
     WHERE a.seller_id = ?
     ORDER BY a.end_time DESC  
   `, [userId]);
@@ -126,23 +110,15 @@ async function getUserBids(userId) {
   const [rows] = await db.execute(`
     SELECT a.*, t.item_name, a.current_highest_bid AS my_bid
     FROM auction_item a
-    JOIN item_template t ON a.item_inst_id = t.item_id
+    JOIN player_item i ON a.item_inst_id = i.item_inst_id
+    JOIN item_template t ON i.item_id = t.item_id
     WHERE a.last_bidder_id = ?
     ORDER BY a.last_bid_time DESC
   `, [userId]);
   return rows;
 }
 
-// 自动结束到期拍卖
-async function closeExpiredauction() {
-  const [result] = await db.execute(`
-    UPDATE auction_item 
-    SET status = '流拍'  
-    WHERE status = '上架中' 
-    AND end_time <= NOW()
-  `);
-  return result.affectedRows;
-}
+
 
 // 更新拍卖状态、当前最高出价和结束时间
 async function updateAuction(id, status, buy_now_price, current_highest_bid, end_time) {
@@ -172,5 +148,4 @@ module.exports = {
   updateAuction,
   getUserauction,
   getUserBids,
-  closeExpiredauction
 };

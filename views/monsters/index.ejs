@@ -1,54 +1,190 @@
-
-<div class="container mt-4">
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>怪物管理系统</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .table-container {
+      overflow-x: auto;
+    }
+    .monster-type-badge {
+      font-weight: bold;
+      padding: 0.2em 0.5em;
+      border-radius: 4px;
+      font-size: 0.85rem;
+    }
+    .rarity-badge {
+      padding: 0.2em 0.4em;
+      border-radius: 3px;
+      font-size: 0.75rem;
+    }
+    .badge-boss { background-color: #dc3545; }
+    .badge-elite { background-color: #ffc107; }
+    .badge-normal { background-color: #198754; }
+    .badge-white { background-color: #6c757d; }
+    .badge-green { background-color: #198754; }
+    .badge-blue { background-color: #0d6efd; }
+    .badge-purple { background-color: #6a0dad; }
+    .badge-orange { background-color: #fd7e14; }
+    .drop-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .hp-bar {
+      height: 8px;
+      background-color: #e9ecef;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+    .hp-progress {
+      height: 100%;
+      border-radius: 4px;
+    }
+    .hp-progress-boss { background-color: #dc3545; }
+    .hp-progress-elite { background-color: #ffc107; }
+    .hp-progress-normal { background-color: #198754; }
+  </style>
+</head>
+<body>
+  <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><%= title %></h2>
-        
+      <h2>怪物列表</h2>
+      <div>
+        <% if (session.user.isAdmin) { %>
+          <a href="/monsters/create" class="btn btn-success">创建新怪物</a>
+        <% } %>
+      </div>
     </div>
-    <!-- 消息提示（优化后） -->
+    
+    <!-- 消息提示 -->
     <% if (flash.success && flash.success.length > 0) { %>
       <% flash.success.forEach(msg => { %>
-        <div class="alert alert-success"><%= msg %></div>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+          <%= msg %>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="关闭"></button>
+        </div>
       <% }); %>
     <% } %>
     <% if (flash.error && flash.error.length > 0) { %>
       <% flash.error.forEach(msg => { %>
-        <div class="alert alert-danger"><%= msg %></div>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+          <%= msg %>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="关闭"></button>
+        </div>
       <% }); %>
     <% } %>
-    <% if (session.user.isAdmin) { %>
-            <a href="/monsters/create" class="btn btn-success">创建新怪物</a>
-        <% } %>
-    <table class="table table-striped">
-      <thead>
-        <tr>
-          <th>名称</th>
-          <th>类型</th>
-          <th>等级</th>
-          <th>生命值</th>
-          <th>所属地图</th>
-          <th>掉落物</th>  <!-- 新增列 -->
-          <th>操作</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% monsters.forEach(monster => { %>
+    
+    <!-- 响应式表格容器 -->
+    <div class="table-container">
+      <table class="table table-striped table-hover">
+        <thead class="table-dark">
           <tr>
+            <th>ID</th>
+            <th>名称</th>
+            <th>类型</th>
+            <th>等级</th>
+            <th>生命值</th>
+            <th>攻击力</th>
+            <th>防御力</th>
+            <th>所属地图</th>
+            <th>掉落物</th>
+            <th>掉落类型</th>
+            <th>稀有度</th>
+            <th>掉落率</th>
+            <th>绑定状态</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% monsters.forEach(monster => { %>
+          <tr>
+            <!-- 怪物ID -->
+            <td><%= monster.monster_id %></td>
+            
+            <!-- 怪物名称 -->
             <td><%= monster.monster_name %></td>
-            <td><%= monster.monster_type %></td>
-            <td><%= monster.level %></td>
-            <td><%= monster.hp_max %></td>
-            <td><%= monster.map_name || '无' %></td>
-            <td><%= monster.drop_item_name || '无' %></td>  <!-- 显示掉落物名称 -->
+            
+            <!-- 怪物类型（带颜色标识） -->
             <td>
-              <a href="/monsters/edit/<%= monster.monster_id %>" class="btn btn-sm btn-primary">编辑</a>
+              <% if (monster.monster_type === 'BOSS') { %>
+                <span class="badge badge-boss monster-type-badge">BOSS</span>
+              <% } else if (monster.monster_type === '精英怪') { %>
+                <span class="badge badge-elite monster-type-badge">精英怪</span>
+              <% } else { %>
+                <span class="badge badge-normal monster-type-badge">普通怪</span>
+              <% } %>
+            </td>
+            
+            <!-- 等级 -->
+            <td><%= monster.level %></td>
+            
+            <!-- 生命值（带进度条） -->
+            <td>
+              <%= monster.hp_max %>
+              <div class="hp-bar">
+                <div class="hp-progress hp-progress-<%= monster.monster_type.toLowerCase().replace('怪', '') %>" 
+                      <%= (monster.hp_max > 5000 ? 100 : (monster.hp_max / 5000) * 100) %>%></div>
+              </div>
+            </td>
+            
+            <!-- 攻击力 -->
+            <td><%= monster.attack %></td>
+            
+            <!-- 防御力 -->
+            <td><%= monster.defense %></td>
+            
+            <!-- 所属地图ID -->
+            <td><%= monster.map_name || '无' %></td>
+            
+            <!-- 掉落物名称 -->
+            <td><%= monster.item_name || '无掉落' %></td>
+            
+            <!-- 掉落物类型 -->
+            <td><%= monster.type || '无' %></td>
+            
+            <!-- 稀有度（带颜色标识） -->
+            <td>
+              <% if (monster.rarity === '白色') { %>
+                <span class="badge badge-white rarity-badge">白色</span>
+              <% } else if (monster.rarity === '绿色') { %>
+                <span class="badge badge-green rarity-badge">绿色</span>
+              <% } else if (monster.rarity === '蓝色') { %>
+                <span class="badge badge-blue rarity-badge">蓝色</span>
+              <% } else if (monster.rarity === '紫色') { %>
+                <span class="badge badge-purple rarity-badge">紫色</span>
+              <% } else if (monster.rarity === '橙色') { %>
+                <span class="badge badge-orange rarity-badge">橙色</span>
+              <% } else { %>
+                <span class="badge bg-secondary rarity-badge"><%= monster.rarity %></span>
+              <% } %>
+            </td>
+            
+            <!-- 掉落率 -->
+            <td><%= monster.drop_rate || '0.00' %>%</td>
+            
+            <!-- 绑定状态 -->
+            <td>
+              <%= monster.is_bind === 1 ? '已绑定' : '未绑定' %>
+            </td>
+            
+            <!-- 操作按钮 -->
+            <td>
+              <a href="/monsters/edit/<%= monster.monster_id %>" class="btn btn-sm btn-primary me-1">编辑</a>
               <% if (session.user.isAdmin) { %>
                 <a href="/monsters/delete/<%= monster.monster_id %>" class="btn btn-sm btn-danger">删除</a>
               <% } %>
             </td>
           </tr>
-        <% }); %>
-      </tbody>
-    </table>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
   </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

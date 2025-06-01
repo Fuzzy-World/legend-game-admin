@@ -5,10 +5,7 @@ class PlayerItem {
   static async getAllPlayerItems() {
     try {
       const [rows] = await pool.execute(`
-        SELECT pi.*, c.char_name, c.account_id, it.item_name 
-        FROM player_item pi
-        LEFT JOIN \`character\` c ON pi.char_id = c.char_id
-        LEFT JOIN item_template it ON pi.item_id = it.item_id
+        SELECT * from v_player_items_stats;
       `);
       return rows || [];
     } catch (error) {
@@ -175,15 +172,12 @@ class PlayerItem {
   }
 
   // 根据账户ID获取物品（修正关联逻辑）
-  static async getPlayerItemsByAccountId(accountId) {
+  static async getPlayerItemsByAccountId(char_Id) {
     try {
       const [rows] = await pool.execute(`
-        SELECT pi.*, c.char_name, it.item_name 
-        FROM player_item pi
-        LEFT JOIN \`character\` c ON pi.char_id = c.char_id
-        LEFT JOIN item_template it ON pi.item_id = it.item_id
-        WHERE c.account_id = ?
-      `, [accountId]);
+        SELECT * FROM v_player_items_stats 
+        WHERE char_id = ?
+      `, [char_Id]);
       return rows || [];
     } catch (error) {
       console.error('获取账户物品列表失败:', error);

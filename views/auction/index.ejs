@@ -2,6 +2,7 @@
 <div class="container mt-4">
   <h2><%= title %></h2>
   
+  
 <!-- 消息提示（修正后） -->
 <% if (flash.success && flash.success.length > 0) { %>
   <div class="alert alert-success"><%= flash.success[0] %></div>
@@ -27,26 +28,40 @@
         </tr>
       </thead>
       <tbody>
-        <% auction.forEach(auction => { %>
+        <% if (!auction || auction.length === 0) { %>
           <tr>
-            <td><%= auction.item_name %></td>
-            <td><%= auction.seller_email %></td>
-            <td><%= auction.current_highest_bid %></td>
-            <td><%= auction.buy_now_price %></td>  <!-- 新增 -->
-            <td><%= new Date(auction.end_time).toLocaleString() %></td>
-            <td><span class="badge bg-<%= {
-              '上架中': 'success',
-              '已完成': 'primary', 
-              '流拍': 'danger'
-            }[auction.status] %>"><%= auction.status %></span></td>
-            <td>
-              <a href="/auction/edit/<%= auction.auction_id %>" class="btn btn-sm btn-primary">编辑</a>
-              <% if (session.user && session.user.isAdmin) { %>
-                <a href="/auction/delete/<%= auction.auction_id %>" class="btn btn-sm btn-danger">删除</a>
-              <% } %>
-            </td>
+            <td colspan="7" class="text-center">暂无拍卖记录</td>
           </tr>
-        <% }); %>
+        <% } else { %>
+          <% auction.forEach(auction => { %>
+            <tr>
+              <td><%= auction.物品名称 || '未命名物品' %></td>
+              <td><%= auction.卖家邮箱 || '未绑定邮箱' %></td>
+              <td><%= auction.当前价格 || 0 %></td>
+              <td><%= auction.一口价 || 0 %></td>
+              <td>
+                <%= auction.结束时间 ? 
+                     new Date(auction.结束时间).toLocaleString() : 
+                     '未知时间' %>
+              </td>
+              <td>
+                <span class="badge bg-<%= {
+                  '上架中': 'success',
+                  '已完成': 'primary',
+                  '流拍': 'danger'
+                }[auction.状态 || '未知'] %>">
+                  <%= auction.状态 || '未知' %>
+                </span>
+              </td>
+              <td>
+                <a href="/auction/edit/<%= auction.auction_id %>" class="btn btn-sm btn-primary">编辑</a>
+                <% if (session.user && session.user.isAdmin) { %>
+                  <a href="/auction/delete/<%= auction.auction_id %>" class="btn btn-sm btn-danger">删除</a>
+                <% } %>
+              </td>
+            </tr>
+          <% }); %>
+        <% } %>
       </tbody>
     </table>
   </div>

@@ -1,4 +1,3 @@
- 
 <div class="container mt-4">
   <h2><%= title %></h2>
   
@@ -37,14 +36,17 @@
     <thead>
       <tr>
         <th>所属账户</th>
-        <th>职业</th>
+        <th>角色名称</th>
         <th>等级</th>
-        <th>血量</th>
-        <th>攻击</th>
-        <th>防御</th>
+        <th>最大血量</th>
+        <th>基础攻击</th>
+        <th>基础防御</th>
+        <th>装备攻击</th>
+        <th>装备防御</th>
+        <th>总攻击</th>
+        <th>总防御</th>
         <th>角色id</th>
         <th>操作</th>
-        
       </tr>
     </thead>
     <tbody>
@@ -56,16 +58,31 @@
           <td><%= c.hp_max %></td>
           <td><%= c.attack %></td>
           <td><%= c.defense %></td>
+          <td><%= c.equip_attack || '无'%></td>
+          <td><%= c.equip_defense || '无'%></td>
+          <td><%= c.total_attack %></td>
+          <td><%= c.total_defense %></td>
           <td><%= c.char_id %></td>
           <td>
             <a href="/characters/edit/<%= c.char_id %>" class="btn btn-sm btn-primary">编辑</a>
             <% if (session.user && session.user.isAdmin) { %>
-              <a href="/characters/delete/<%= c.char_id %>" class="btn btn-sm btn-danger">删除</a>
+              <a href="/characters/delete/<%= c.char_id %>" class="btn btn-sm btn-danger" onclick="return confirm('确定要删除这个角色吗？')">删除</a>
             <% } %>
           </td>
         </tr>
       <% }); %>
+      
+      <!-- 空数据提示 -->
+      <% if (characters.length === 0) { %>
+        <tr>
+          <td colspan="12" class="text-center py-8 text-gray-500">
+            暂无角色数据
+            <% if (session.user && session.user.isAdmin) { %>
+              <br><a href="/characters/create" class="text-primary">点击创建角色</a>
+            <% } %>
+          </td>
+        </tr>
+      <% } %>
     </tbody>
   </table>
 </div>
-  
