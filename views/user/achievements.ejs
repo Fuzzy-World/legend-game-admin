@@ -1,33 +1,42 @@
 
+
 <div class="container mt-4">
     <h2 class="mb-4">我的成就</h2>
-    <div class="row">
-        <% achievements.forEach(achievement => { %>
-        <div class="col-md-6 mb-4">
-            <div class="card h-100">
-                <div class="card-body">
-                    <h5 class="card-title">
-                        <i class="bi bi-trophy me-2"></i>
-                        <%= achievement.achievement_name %>
-                    </h5>
-                    <div class="progress mb-3">
-                        <div class="progress-bar" role="progressbar" 
-                             <%= (achievement.progress / achievement.target) * 100 %>%">
-                            <%= achievement.progress_display %>
+    
+    <!-- 检查成就数组是否为空 -->
+    <% if (achievements.length === 0) { %>
+        <div class="alert alert-info" role="alert">
+            你还没有任何成就。完成游戏中的任务和挑战以解锁成就！
+        </div>
+    <% } else { %>
+        <div class="row">
+            <% achievements.forEach(achievement => { %>
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="bi bi-trophy me-2"></i>
+                            <%= achievement.achievement_name %>
+                        </h5>
+                        <div class="progress mb-3">
+                            <div class="progress-bar" role="progressbar" 
+                                  <%= (achievement.progress / achievement.target) * 100 %>%">
+                                <%= achievement.progress_display %>
+                            </div>
                         </div>
-                    </div>
-                    <p class="card-text"><%= achievement.description %></p>
-                    <div class="d-flex justify-content-between">
-                        <span class="badge bg-primary">
-                            <%= achievement.achievement_type %>
-                        </span>
-                        <span class="text-muted">
-                            积分：<%= achievement.points %>
-                        </span>
+                        <p class="card-text"><%= achievement.description || '暂无描述' %></p>
+                        <div class="d-flex justify-content-between">
+                            <span class="badge bg-primary">
+                                <%= achievement.achievement_type %>
+                            </span>
+                            <span class="text-muted">
+                                积分：<%= achievement.points %>
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
+            <% }); %>
         </div>
-        <% }); %>
-    </div>
+    <% } %>
 </div>
